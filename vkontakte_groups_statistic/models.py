@@ -15,7 +15,7 @@ import simplejson as json
 
 log = logging.getLogger('vkontakte_groups_statistic')
 
-def update_statistic_for_group(group, api=False):
+def fetch_statistic_for_group(group, api=False):
     '''
     Get html page with statistic charts and parse it
     '''

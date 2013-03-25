@@ -12,7 +12,7 @@ class VkontakteGroupsStatisticTest(TestCase):
         group = GroupFactory.create(remote_id=GROUP_ID)
         self.assertEqual(GroupStat.objects.count(), 0)
 
-        group.update_statistic()
+        group.fetch_statistic()
         self.assertNotEqual(GroupStat.objects.count(), 0)
 
         stat = GroupStat.objects.all()[0]
@@ -28,7 +28,7 @@ class VkontakteGroupsStatisticTest(TestCase):
         group = GroupFactory.create(remote_id=GROUP_ID)
         self.assertEqual(GroupStatistic.objects.count(), 0)
 
-        group.update_statistic(api=True)
+        group.fetch_statistic(api=True)
         self.assertNotEqual(GroupStatistic.objects.count(), 0)
 
         stat = GroupStatistic.objects.all()[0]
