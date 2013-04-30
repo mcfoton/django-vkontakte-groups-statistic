@@ -3,7 +3,6 @@ from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext as _
 from django.core.exceptions import ImproperlyConfigured
-from vkontakte_api.utils import api_call
 from vkontakte_api.models import VkontakteManager, VkontakteModel, VkontakteIDModel, VkontakteDeniedAccessError, VkontakteContentError
 from vkontakte_groups.models import Group
 from oauth_tokens.providers.vkontakte import VkontakteAccessToken
