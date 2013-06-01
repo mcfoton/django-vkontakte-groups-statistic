@@ -37,6 +37,7 @@ def fetch_statistic_for_group(group, api=False):
 class GroupStatManager(models.Manager):
 
     def parse_statistic_page(self, group, section, content):
+        import ipdb; ipdb.set_trace()
 
         if 'var graphdata' in content:
             graphs = re.findall(r'var graphdata = \'([^\']+)\'', content)
@@ -121,6 +122,7 @@ class GroupStatManager(models.Manager):
                     (u'Комментарии', 'comments'),
                     (u'Рассказать друзьям', 'shares'),
                     (u'Упоминания', 'references'),
+                    (u'Скрыли из новостей', 'hidings')
                 ),
                 'activity': (
                     (u'Сообщения на стене', 'activity_wall'),
@@ -486,6 +488,7 @@ class GroupStatisticAbstract(models.Model):
     comments = models.PositiveIntegerField(u'Комментарии', null=True)
     shares = models.PositiveIntegerField(u'Рассказать друзьям', null=True)
     references = models.PositiveIntegerField(u'Упоминания', null=True)
+    hidings = models.PositiveIntegerField(u'Скрытий', null=True)
 
     new_members = models.PositiveIntegerField(u'Новые участники', null=True)
     ex_members = models.PositiveIntegerField(u'Вышедшие участники', null=True)
