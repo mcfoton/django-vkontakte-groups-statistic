@@ -94,7 +94,7 @@ class GroupStatManager(models.Manager):
 #                    (u'Приложения', 'section_applications'),
                     (u'Документы', 'section_documents'),
                 ),
-                'traffic_sources': (
+                'traffic': (
                     (u'Реклама', 'traffic_ads'),
                     (u'Поисковые системы', 'traffic_search_systems'),
                     (u'Внешние сайты', 'traffic_external_sites'),
