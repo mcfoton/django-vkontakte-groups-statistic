@@ -37,7 +37,6 @@ def fetch_statistic_for_group(group, api=False):
 class GroupStatManager(models.Manager):
 
     def parse_statistic_page(self, group, section, content):
-        import ipdb; ipdb.set_trace()
 
         if 'var graphdata' in content:
             graphs = re.findall(r'var graphdata = \'([^\']+)\'', content)
