@@ -95,15 +95,19 @@ class GroupStatManager(models.Manager):
                     (u'Документы', 'section_documents'),
                 ),
                 'traffic_sources': (
+                    (u'Реклама', 'traffic_ads'),
                     (u'Поисковые системы', 'traffic_search_systems'),
                     (u'Внешние сайты', 'traffic_external_sites'),
                     (u'Мои группы', 'traffic_my_groups'),
+                    (u'Рекомендации', 'traffic_recomendation'),
                     (u'Новости', 'traffic_news'),
                     (u'Топ сообществ', 'traffic_top'),
                     (u'Результаты поиска ВК', 'traffic_search_results'),
                     (u'Страницы пользователей', 'traffic_users'),
                     (u'Страницы сообществ', 'traffic_groups'),
                     (u'Приложения', 'traffic_applications'),
+                    (u'Специальные предложения', 'traffic_special_offers'),
+                    (u'Виджет сообществ', 'traffic_community_widget'),
                     (u'Браузерные закладки', 'traffic_bookmarklets'),
                 ),
             },
@@ -557,15 +561,19 @@ class GroupStatisticAbstract(models.Model):
     reach_age_35_45 = models.PositiveIntegerField(u'От 35 до 45', null=True)
     reach_age_45 = models.PositiveIntegerField(u'От 45', null=True)
 
+    traffic_ads = models.PositiveIntegerField(u'Реклама', null=True)
     traffic_search_systems = models.PositiveIntegerField(u'Поисковые системы', null=True)
     traffic_external_sites = models.PositiveIntegerField(u'Внешние сайты', null=True)
     traffic_my_groups = models.PositiveIntegerField(u'Мои группы', null=True)
+    traffic_recomendation = models.PositiveIntegerField(u'Рекомендации', null=True)
     traffic_news = models.PositiveIntegerField(u'Новости', null=True)
     traffic_top = models.PositiveIntegerField(u'Топ сообществ', null=True)
     traffic_search_results = models.PositiveIntegerField(u'Результаты поиска ВК', null=True)
     traffic_users = models.PositiveIntegerField(u'Страницы пользователей', null=True)
     traffic_groups = models.PositiveIntegerField(u'Страницы сообществ', null=True)
     traffic_applications = models.PositiveIntegerField(u'Приложения', null=True)
+    traffic_special_offers = models.PositiveIntegerField(u'Специальные предложения', null=True)
+    traffic_community_widget = models.PositiveIntegerField(u'Виджет сообществ', null=True)
     traffic_bookmarklets = models.PositiveIntegerField(u'Браузерные закладки', null=True)
 
 class GroupStat(GroupStatisticAbstract):
