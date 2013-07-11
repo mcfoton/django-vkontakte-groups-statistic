@@ -111,6 +111,7 @@ class GroupStatManager(models.Manager):
                     (u'Приложения', 'sources_applications'),
                     (u'Специальные предложения', 'sources_special_offers'),
                     (u'Виджет сообществ', 'sources_community_widget'),
+                    (u'Аудиозаписи', 'sources_audio'),
                     (u'Браузерные закладки', 'sources_favorites'),
                 ),
             },
@@ -196,9 +197,6 @@ class GroupStatManager(models.Manager):
                     else:
                         data[stat_date] = pair
 
-        # delete previous statistic
-#        group.statistics.all().delete()
-
         groupstats = []
         # save statistic
         for stat_date, values in data.items():
@@ -282,10 +280,6 @@ class GroupStatPercentageManager(models.Manager):
     def parse_statistic_page(self, group, section, content):
         # TODO: fix percentage graphs. With current headers, there is no charts in response, only graphs
         graphs = re.findall(r'cur.invokeSvgFunction\(\'(.+)_chart\', \'loadData\', \[\[([^\]]+)\]\]\)', content)
-        import ipdb; ipdb.set_trace()
-
-#         if len(graphs) and len(graphs) < 4:
-#             raise VkontakteContentError("Response doesn't contain right number of pie charts: 0 < %d < 4" % len(graphs))
 
         fields_map = {
             u'мужчины': (1, 'males'),
@@ -304,7 +298,8 @@ class GroupStatPercentageManager(models.Manager):
             u'Приложения': (11, 'applications'),
             u'Специальные предложения': (12, 'special_offers'),
             u'Виджет сообществ': (13, 'community_widget'),
-            u'Браузерные закладки': (14, 'favorites'),
+            u'Аудиозаписи': (14, 'audio'),
+            u'Браузерные закладки': (15, 'favorites'),
 
             u'до 18':        (1, '_18'),
             u'от 18 до 21':  (2, '18_21'),
@@ -377,7 +372,9 @@ class GroupStatPercentageManager(models.Manager):
         groupstats = []
         # save statistic
         for stat in stats:
-            groupstat = self.model.objects.get_or_create(group=group, type=section + stat['type'], value_type=stat['value_type'])[0]
+            type = section + '_' if section else ''
+            type += stat.pop('type')
+            groupstat = self.model.objects.get_or_create(group=group, type=type, value_type=stat['value_type'])[0]
             groupstat.__dict__.update(stat)
             groupstat.save()
 
@@ -421,7 +418,7 @@ class GroupStatistic(VkontakteModel):
     methods_namespace = 'stats'
 
     group = models.ForeignKey(Group, verbose_name=u'Группа', related_name='statistics_api')
-    date = models.DateField(u'Дата')
+    date = models.DateField(u'Дата', db_index=True)
 
     visitors = models.PositiveIntegerField(u'Уникальные посетители', null=True)
     views = models.PositiveIntegerField(u'Просмотры', null=True)
@@ -591,6 +588,7 @@ class GroupStatisticAbstract(models.Model):
     sources_applications = models.PositiveIntegerField(u'Приложения', null=True)
     sources_special_offers = models.PositiveIntegerField(u'Специальные предложения', null=True)
     sources_community_widget = models.PositiveIntegerField(u'Виджет сообществ', null=True)
+    sources_audio = models.PositiveIntegerField(u'Аудиозаписи', null=True)
     sources_favorites = models.PositiveIntegerField(u'Браузерные закладки', null=True)
 
 class GroupStat(GroupStatisticAbstract):
