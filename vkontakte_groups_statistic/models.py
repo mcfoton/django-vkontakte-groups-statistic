@@ -23,14 +23,17 @@ def fetch_statistic_for_group(group, api=False):
     else:
         vk = VkontakteAccessToken()
         for act in ['','reach','activity']:
-            response = vk.authorized_request(url='http://vk.com/stats?act=%s&gid=%d' % (act, group.remote_id))
+            response = vk.authorized_request(url='http://vk.com/stats?act=%s&gid=%d' % (act, group.remote_id), headers={'User-Agent': 'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/28.0.1500.52 Chrome/28.0.1500.52 Safari/537.36'})
             content = response.content.decode('windows-1251')
 
             if u'У Вас нет прав на просмотр этой страницы.' in content:
-                raise VkontakteDeniedAccessError("User doesn't have rights to see statistic of this group %s" % group.name)
+                raise VkontakteDeniedAccessError("User doesn't have rights to see statistic of this group ID=%s" % group.pk)
+
+            if u'Чтобы просматривать эту страницу, нужно зайти на сайт.' in content:
+                raise VkontakteDeniedAccessError("Authorization for group ID=%s was unsuccessful" % group.pk)
 
             GroupStat.objects.parse_statistic_page(group, act, content)
-            GroupStatPercentage.objects.parse_statistic_page(group, content)
+            GroupStatPercentage.objects.parse_statistic_page(group, act, content)
 
     return True
 
@@ -94,21 +97,21 @@ class GroupStatManager(models.Manager):
 #                    (u'Приложения', 'section_applications'),
                     (u'Документы', 'section_documents'),
                 ),
-                'traffic': (
-                    (u'Реклама', 'traffic_ads'),
-                    (u'Поисковые системы', 'traffic_search_systems'),
-                    (u'Внешние сайты', 'traffic_external_sites'),
-                    (u'Мои группы', 'traffic_my_groups'),
-                    (u'Рекомендации', 'traffic_recomendation'),
-                    (u'Новости', 'traffic_news'),
-                    (u'Топ сообществ', 'traffic_top'),
-                    (u'Результаты поиска ВК', 'traffic_search_results'),
-                    (u'Страницы пользователей', 'traffic_users'),
-                    (u'Страницы сообществ', 'traffic_groups'),
-                    (u'Приложения', 'traffic_applications'),
-                    (u'Специальные предложения', 'traffic_special_offers'),
-                    (u'Виджет сообществ', 'traffic_community_widget'),
-                    (u'Браузерные закладки', 'traffic_bookmarklets'),
+                'sources': (
+                    (u'Реклама', 'sources_ads'),
+                    (u'Поисковые системы', 'sources_search_systems'),
+                    (u'Внешние сайты', 'sources_external_sites'),
+                    (u'Мои группы', 'sources_my_groups'),
+                    (u'Рекомендации', 'sources_recomendation'),
+                    (u'Новости', 'sources_news'),
+                    (u'Топ сообществ', 'sources_top'),
+                    (u'Результаты поиска ВК', 'sources_search_results'),
+                    (u'Страницы пользователей', 'sources_users'),
+                    (u'Страницы сообществ', 'sources_groups'),
+                    (u'Приложения', 'sources_applications'),
+                    (u'Специальные предложения', 'sources_special_offers'),
+                    (u'Виджет сообществ', 'sources_community_widget'),
+                    (u'Браузерные закладки', 'sources_favorites'),
                 ),
             },
             'reach': {
@@ -276,17 +279,32 @@ class GroupStatPercentageManager(models.Manager):
 
         return stats
 
-    def parse_statistic_page(self, group, content):
-
+    def parse_statistic_page(self, group, section, content):
         # TODO: fix percentage graphs. With current headers, there is no charts in response, only graphs
         graphs = re.findall(r'cur.invokeSvgFunction\(\'(.+)_chart\', \'loadData\', \[\[([^\]]+)\]\]\)', content)
+        import ipdb; ipdb.set_trace()
 
-        if len(graphs) and len(graphs) < 4:
-            raise VkontakteContentError("Response doesn't contain right number of pie charts: 0 < %d < 4" % len(graphs))
+#         if len(graphs) and len(graphs) < 4:
+#             raise VkontakteContentError("Response doesn't contain right number of pie charts: 0 < %d < 4" % len(graphs))
 
         fields_map = {
             u'мужчины': (1, 'males'),
             u'женщины': (2, 'females'),
+
+            u'Реклама': (1, 'ads'),
+            u'Поисковые системы': (2, 'search_systems'),
+            u'Внешние сайты': (3, 'external_sites'),
+            u'Мои группы': (4, 'my_groups'),
+            u'Рекомендации': (5, 'recomendation'),
+            u'Новости': (6, 'news'),
+            u'Топ сообществ': (7, 'top'),
+            u'Результаты поиска ВК': (8, 'search_results'),
+            u'Страницы пользователей': (9, 'users'),
+            u'Страницы сообществ': (10, 'groups'),
+            u'Приложения': (11, 'applications'),
+            u'Специальные предложения': (12, 'special_offers'),
+            u'Виджет сообществ': (13, 'community_widget'),
+            u'Браузерные закладки': (14, 'favorites'),
 
             u'до 18':        (1, '_18'),
             u'от 18 до 21':  (2, '18_21'),
@@ -326,10 +344,9 @@ class GroupStatPercentageManager(models.Manager):
 
             for graph_slice in graph_data:
                 # {"l":"до 18","q":552,"p":"9.13","id":0,"c":"женщины"}
-                name = [graph_slice['l']]
-                if graph_slice['c']:
-                    name = [graph_slice['c']] + name
-                name = ' '.join(name)
+                name = graph_slice['l']
+                if 'c' in graph_slice:
+                    name += ' ' + graph_slice['c']
 
                 type = graph[0]
                 try:
@@ -360,7 +377,7 @@ class GroupStatPercentageManager(models.Manager):
         groupstats = []
         # save statistic
         for stat in stats:
-            groupstat = self.model.objects.get_or_create(group=group, type=stat['type'], value_type=stat['value_type'])[0]
+            groupstat = self.model.objects.get_or_create(group=group, type=section + stat['type'], value_type=stat['value_type'])[0]
             groupstat.__dict__.update(stat)
             groupstat.save()
 
@@ -561,20 +578,20 @@ class GroupStatisticAbstract(models.Model):
     reach_age_35_45 = models.PositiveIntegerField(u'От 35 до 45', null=True)
     reach_age_45 = models.PositiveIntegerField(u'От 45', null=True)
 
-    traffic_ads = models.PositiveIntegerField(u'Реклама', null=True)
-    traffic_search_systems = models.PositiveIntegerField(u'Поисковые системы', null=True)
-    traffic_external_sites = models.PositiveIntegerField(u'Внешние сайты', null=True)
-    traffic_my_groups = models.PositiveIntegerField(u'Мои группы', null=True)
-    traffic_recomendation = models.PositiveIntegerField(u'Рекомендации', null=True)
-    traffic_news = models.PositiveIntegerField(u'Новости', null=True)
-    traffic_top = models.PositiveIntegerField(u'Топ сообществ', null=True)
-    traffic_search_results = models.PositiveIntegerField(u'Результаты поиска ВК', null=True)
-    traffic_users = models.PositiveIntegerField(u'Страницы пользователей', null=True)
-    traffic_groups = models.PositiveIntegerField(u'Страницы сообществ', null=True)
-    traffic_applications = models.PositiveIntegerField(u'Приложения', null=True)
-    traffic_special_offers = models.PositiveIntegerField(u'Специальные предложения', null=True)
-    traffic_community_widget = models.PositiveIntegerField(u'Виджет сообществ', null=True)
-    traffic_bookmarklets = models.PositiveIntegerField(u'Браузерные закладки', null=True)
+    sources_ads = models.PositiveIntegerField(u'Реклама', null=True)
+    sources_search_systems = models.PositiveIntegerField(u'Поисковые системы', null=True)
+    sources_external_sites = models.PositiveIntegerField(u'Внешние сайты', null=True)
+    sources_my_groups = models.PositiveIntegerField(u'Мои группы', null=True)
+    sources_recomendation = models.PositiveIntegerField(u'Рекомендации', null=True)
+    sources_news = models.PositiveIntegerField(u'Новости', null=True)
+    sources_top = models.PositiveIntegerField(u'Топ сообществ', null=True)
+    sources_search_results = models.PositiveIntegerField(u'Результаты поиска ВК', null=True)
+    sources_users = models.PositiveIntegerField(u'Страницы пользователей', null=True)
+    sources_groups = models.PositiveIntegerField(u'Страницы сообществ', null=True)
+    sources_applications = models.PositiveIntegerField(u'Приложения', null=True)
+    sources_special_offers = models.PositiveIntegerField(u'Специальные предложения', null=True)
+    sources_community_widget = models.PositiveIntegerField(u'Виджет сообществ', null=True)
+    sources_favorites = models.PositiveIntegerField(u'Браузерные закладки', null=True)
 
 class GroupStat(GroupStatisticAbstract):
     '''

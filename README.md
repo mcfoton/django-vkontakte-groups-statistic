@@ -1,10 +1,10 @@
-# Django Vkontakte Groups Statistic
-
-[![Build Status](https://travis-ci.org/ramusus/django-vkontakte-groups-statistic.png?branch=master)](https://travis-ci.org/ramusus/django-vkontakte-groups-statistic) [![Coverage Status](https://coveralls.io/repos/ramusus/django-vkontakte-groups-statistic/badge.png?branch=master)](https://coveralls.io/r/ramusus/django-vkontakte-groups-statistic)
+Django Vkontakte Groups Statistic [![Build Status](https://travis-ci.org/ramusus/django-vkontakte-groups-statistic.png?branch=master)](https://travis-ci.org/ramusus/django-vkontakte-groups-statistic) [![Coverage Status](https://coveralls.io/repos/ramusus/django-vkontakte-groups-statistic/badge.png?branch=master)](https://coveralls.io/r/ramusus/django-vkontakte-groups-statistic)
+=================================
 
 Приложение позволяет взаимодействовать со статистикой групп Вконтакте через Вконтакте API и парсер используя стандартные модели Django
 
-## Установка
+Установка
+---------
 
     pip install django-vkontakte-groups-statistic
 
@@ -27,15 +27,18 @@
     OAUTH_TOKENS_VKONTAKTE_PASSWORD = ''                                # user password
     OAUTH_TOKENS_VKONTAKTE_PHONE_END = ''                               # last 4 digits of user mobile phone
 
-## Покрытие методов API
+Покрытие методов API
+--------------------
 
 * [stats.get](http://vk.com/developers.php?oid=-1&p=stats.get) – возвращает статистику группы или приложения;
 
-## Использование парсера
+Использование парсера
+---------------------
 
 * Получение полной статистики со страницы статистики группы. Для этого пользователь, под которым ходит приложение, должен иметь права для доступа к этой странице. В случае если прав у данного пользователя нет, можно импортировать статистику вручную через букмарклет браузера.
 
-## Примеры использования
+Примеры использования
+---------------------
 
 ### Получение статистики группы
 
