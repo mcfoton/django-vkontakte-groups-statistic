@@ -343,7 +343,9 @@ class GroupStatPercentageManager(models.Manager):
                 if 'c' in graph_slice:
                     name += ' ' + graph_slice['c']
 
-                type = graph[0]
+                type = section + '_' if section else ''
+                type += graph[0]
+
                 try:
                     order = fields_map[name][0]
                     value_type = fields_map[name][1]
@@ -372,9 +374,7 @@ class GroupStatPercentageManager(models.Manager):
         groupstats = []
         # save statistic
         for stat in stats:
-            type = section + '_' if section else ''
-            type += stat.pop('type')
-            groupstat = self.model.objects.get_or_create(group=group, type=type, value_type=stat['value_type'])[0]
+            groupstat = self.model.objects.get_or_create(group=group, type=stat['type'], value_type=stat['value_type'])[0]
             groupstat.__dict__.update(stat)
             groupstat.save()
 
