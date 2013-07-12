@@ -11,6 +11,7 @@ from urllib import unquote
 import logging
 import re
 import simplejson as json
+from IPython.core.debugger import Pdb
 
 log = logging.getLogger('vkontakte_groups_statistic')
 
@@ -278,7 +279,6 @@ class GroupStatPercentageManager(models.Manager):
         return stats
 
     def parse_statistic_page(self, group, section, content):
-        # TODO: fix percentage graphs. With current headers, there is no charts in response, only graphs
         graphs = re.findall(r'cur.invokeSvgFunction\(\'(.+)_chart\', \'loadData\', \[\[([^\]]+)\]\]\)', content)
 
         fields_map = {
@@ -367,7 +367,7 @@ class GroupStatPercentageManager(models.Manager):
                 }]
 
         # delete previous statistic
-#        group.percentage_statistics.all().delete()
+        group.percentage_statistics.filter(type__in=set([stat['type'] for stat in stats])).delete()
 
         groupstats = []
         # save statistic
