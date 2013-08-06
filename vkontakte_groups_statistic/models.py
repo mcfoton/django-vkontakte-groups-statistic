@@ -42,7 +42,14 @@ class GroupStatManager(models.Manager):
 
     def parse_statistic_page(self, group, section, content):
 
-        if 'var graphdata' in content:
+        if 'cur.graphDatas' in content:
+            graphs = re.findall(r'cur.graphDatas\[\'([^\']+)\'\] = \'([^\']+)\'', content)
+            # u'visitors_graph', u'sex_age_chart_graph', u'sex_age_graph', u'sex_graph', u'country_graph', u'city_graph', u'source_graph', u'ads_graph', u'members_graph', u'widgets_graph', u'sections_graph', u'form_audio_graph']
+            # TODO: make decisions of what graph is it on key, not on title
+            graphs = [graph[1] for graph in graphs]
+
+        elif 'var graphdata' in content:
+            # old version, changed to first 'cur.graphDatas'
             graphs = re.findall(r'var graphdata = \'([^\']+)\'', content)
 
         elif 'graphdata=' in content:
