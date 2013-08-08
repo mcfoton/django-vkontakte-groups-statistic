@@ -36,7 +36,7 @@ def import_statistic(request, redirect_url_name=None, form_class=GroupImportStat
 
     context['form'] = form
 
-    return render_to_response('vkontakte_groups/import_group_statistic.html', context, context_instance=RequestContext(request))
+    return render_to_response('vkontakte_groups_statistic/import_group_statistic.html', context, context_instance=RequestContext(request))
 
 @csrf_exempt
 def import_statistic_via_bookmarklet(request, redirect_url_name=None):
