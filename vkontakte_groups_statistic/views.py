@@ -6,7 +6,7 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response
 from vkontakte_groups_statistic.models import GroupStat, GroupStatPercentage, VkontakteDeniedAccessError
 from models import Group
-from forms import GroupImportStatisticForm, GroupImportPostsForm
+from forms import GroupImportStatisticForm
 import re
 import logging
 
