@@ -4,8 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.urlresolvers import reverse
 from django.template import RequestContext
 from django.shortcuts import render_to_response
-from vkontakte_groups_statistic.models import GroupStat, GroupStatPercentage, VkontakteDeniedAccessError
-from models import Group
+from models import VkontakteDeniedAccessError, Group, parse_statistic_for_group
 from forms import GroupImportStatisticForm
 import re
 import logging
@@ -56,8 +55,7 @@ def import_statistic_via_bookmarklet(request, redirect_url_name=None, redirect_k
     act, group_id = m[0]
     group = Group.remote.fetch(ids=[group_id])[0]
 
-    GroupStat.objects.parse_statistic_page(group, act, content)
-    GroupStatPercentage.objects.parse_statistic_page(group, act, content)
+    parse_statistic_for_group(group, act, content)
 
     if redirect_kwargs is None:
         redirect_kwargs = {}

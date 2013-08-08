@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db import models
+from django.dispatch import Signal
 from django.conf import settings
 from django.utils.translation import ugettext as _
 from django.core.exceptions import ImproperlyConfigured
@@ -14,6 +15,8 @@ import simplejson as json
 from IPython.core.debugger import Pdb
 
 log = logging.getLogger('vkontakte_groups_statistic')
+
+group_statistic_page_parsed = Signal(providing_args=['instance'])
 
 def fetch_statistic_for_group(group, api=False):
     '''
@@ -33,10 +36,14 @@ def fetch_statistic_for_group(group, api=False):
             if u'Чтобы просматривать эту страницу, нужно зайти на сайт.' in content:
                 raise VkontakteDeniedAccessError("Authorization for group ID=%s was unsuccessful" % group.pk)
 
-            GroupStat.objects.parse_statistic_page(group, act, content)
-            GroupStatPercentage.objects.parse_statistic_page(group, act, content)
+            parse_statistic_for_group(group, act, content)
 
     return True
+
+def parse_statistic_for_group(group, act, content):
+    GroupStat.objects.parse_statistic_page(group, act, content)
+    GroupStatPercentage.objects.parse_statistic_page(group, act, content)
+    group_statistic_page_parsed.send(sender=Group, instance=group)
 
 class GroupStatManager(models.Manager):
 
