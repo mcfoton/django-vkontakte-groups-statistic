@@ -39,7 +39,7 @@ def import_statistic(request, redirect_url_name=None, form_class=GroupImportStat
     return render_to_response('vkontakte_groups_statistic/import_group_statistic.html', context, context_instance=RequestContext(request))
 
 @csrf_exempt
-def import_statistic_via_bookmarklet(request, redirect_url_name=None):
+def import_statistic_via_bookmarklet(request, redirect_url_name=None, redirect_kwargs=None):
     # TODO: show errors instead of redirect
     try:
         url, content = request.POST['url'], request.POST['body']
@@ -58,7 +58,12 @@ def import_statistic_via_bookmarklet(request, redirect_url_name=None):
 
     GroupStat.objects.parse_statistic_page(group, act, content)
     GroupStatPercentage.objects.parse_statistic_page(group, act, content)
+
+    if redirect_kwargs is None:
+        redirect_kwargs = {}
+    redirect_kwargs['object_id'] = group.id
+
     try:
-        return HttpResponseRedirect(reverse(redirect_url_name, args=(group.id,)))
+        return HttpResponseRedirect(reverse(redirect_url_name, kwargs=redirect_kwargs))
     except:
         return HttpResponseRedirect('/')
