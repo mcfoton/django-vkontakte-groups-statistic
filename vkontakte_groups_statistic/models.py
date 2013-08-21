@@ -25,7 +25,7 @@ def fetch_statistic_for_group(group, api=False):
     if api:
         GroupStatistic.remote.fetch_for_group(group)
     else:
-        vk = VkontakteAccessToken()
+        vk = VkontakteAccessToken(tag='groups_statistic')
         for act in ['','reach','activity']:
             response = vk.authorized_request(url='http://vk.com/stats?act=%s&gid=%d' % (act, group.remote_id), headers={'User-Agent': 'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/28.0.1500.52 Chrome/28.0.1500.52 Safari/537.36'})
             content = response.content.decode('windows-1251')
