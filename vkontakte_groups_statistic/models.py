@@ -9,10 +9,9 @@ from vkontakte_groups.models import Group
 from oauth_tokens.providers.vkontakte import VkontakteAccessToken
 from datetime import datetime
 from urllib import unquote
+import simplejson as json
 import logging
 import re
-import simplejson as json
-from IPython.core.debugger import Pdb
 
 log = logging.getLogger('vkontakte_groups_statistic')
 
