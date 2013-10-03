@@ -1,5 +1,7 @@
-Django Vkontakte Groups Statistic [![Build Status](https://travis-ci.org/ramusus/django-vkontakte-groups-statistic.png?branch=master)](https://travis-ci.org/ramusus/django-vkontakte-groups-statistic) [![Coverage Status](https://coveralls.io/repos/ramusus/django-vkontakte-groups-statistic/badge.png?branch=master)](https://coveralls.io/r/ramusus/django-vkontakte-groups-statistic)
+Django Vkontakte Groups Statistic
 =================================
+
+[![PyPI version](https://badge.fury.io/py/django-vkontakte-groups-statistic.png)](http://badge.fury.io/py/django-vkontakte-groups-statistic) [![Build Status](https://travis-ci.org/ramusus/django-vkontakte-groups-statistic.png?branch=master)](https://travis-ci.org/ramusus/django-vkontakte-groups-statistic) [![Coverage Status](https://coveralls.io/repos/ramusus/django-vkontakte-groups-statistic/badge.png?branch=master)](https://coveralls.io/r/ramusus/django-vkontakte-groups-statistic)
 
 Приложение позволяет взаимодействовать со статистикой групп Вконтакте через Вконтакте API и парсер используя стандартные модели Django
 
@@ -13,6 +15,7 @@ Django Vkontakte Groups Statistic [![Build Status](https://travis-ci.org/ramusus
     INSTALLED_APPS = (
         ...
         'oauth_tokens',
+        'taggit',
         'vkontakte_api',
         'vkontakte_groups',
         'vkontakte_groups_statistic',
@@ -30,7 +33,7 @@ Django Vkontakte Groups Statistic [![Build Status](https://travis-ci.org/ramusus
 Покрытие методов API
 --------------------
 
-* [stats.get](http://vk.com/developers.php?oid=-1&p=stats.get) – возвращает статистику группы или приложения;
+* [stats.get](http://vk.com/dev/stats.get) – возвращает статистику группы или приложения;
 
 Использование парсера
 ---------------------
