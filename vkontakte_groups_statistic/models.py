@@ -46,6 +46,110 @@ def parse_statistic_for_group(group, act, content):
 
 class GroupStatManager(models.Manager):
 
+    fields_map = {
+        '': {
+            'visitors': (
+                (u'уникальные посетители', 'visitors'),
+                (u'просмотры', 'views'),
+            ),
+            'gender': (
+                (u'женщины', 'females'),
+                (u'мужчины', 'males'),
+            ),
+            'age': (
+                (u'до 18', 'age_18'),
+                (u'от 18 до 21', 'age_18_21'),
+                (u'от 21 до 24', 'age_21_24'),
+                (u'от 24 до 27', 'age_24_27'),
+                (u'от 27 до 30', 'age_27_30'),
+                (u'от 30 до 35', 'age_30_35'),
+                (u'от 35 до 45', 'age_35_45'),
+                (u'от 45', 'age_45'),
+            ),
+            'ads': (
+                (u'Зашедшие с рекламы', 'ads_visitors'),
+                (u'Вступившие с рекламы', 'ads_members'),
+                (u'Зашедшие с акций', 'act_visitors'),
+                (u'Вступившие с акции', 'act_members'),
+            ),
+            'members': (
+                (u'Новые участники', 'new_members'),
+                (u'Вышедшие участники', 'ex_members'),
+                (u'Всего участников', 'members'),
+            ),
+            'widget': (
+                (u'Просмотры пользователей ВКонтакте', 'widget_users_views'),
+                (u'Просмотры участников группы', 'widget_members_views'),
+                (u'Новые участники', 'widget_new_users'),
+                (u'Вышедшие участники', 'widget_ex_users'),
+            ),
+            'sections': (
+                (u'Обсуждения', 'section_discussions'),
+                (u'Аудиозаписи', 'section_audio'),
+                (u'Видеозаписи', 'section_video'),
+                (u'Фотоальбомы', 'section_photoalbums'),
+                # VK убрал график после разделения графиков на вкладки cocacola 2012-12-18
+#                    (u'Приложения', 'section_applications'),
+                (u'Документы', 'section_documents'),
+            ),
+            'sources': (
+                (u'Реклама', 'sources_ads'),
+                (u'Поисковые системы', 'sources_search_systems'),
+                (u'Внешние сайты', 'sources_external_sites'),
+                (u'Мои группы', 'sources_my_groups'),
+                (u'Рекомендации', 'sources_recomendation'),
+                (u'Новости', 'sources_news'),
+                (u'Топ сообществ', 'sources_top'),
+                (u'Результаты поиска ВК', 'sources_search_results'),
+                (u'Страницы пользователей', 'sources_users'),
+                (u'Страницы сообществ', 'sources_groups'),
+                (u'Приложения', 'sources_applications'),
+                (u'Специальные предложения', 'sources_special_offers'),
+                (u'Виджет сообществ', 'sources_community_widget'),
+                (u'Аудиозаписи', 'sources_audio'),
+                (u'Браузерные закладки', 'sources_favorites'),
+            ),
+        },
+        'reach': {
+            'reach': (
+                (u'Полный охват', 'reach'),
+                (u'Охват подписчиков', 'reach_subsribers'),
+            ),
+            'gender': (
+                (u'женщины', 'reach_females'),
+                (u'мужчины', 'reach_males'),
+            ),
+            'age': (
+                (u'до 18', 'reach_age_18'),
+                (u'от 18 до 21', 'reach_age_18_21'),
+                (u'от 21 до 24', 'reach_age_21_24'),
+                (u'от 24 до 27', 'reach_age_24_27'),
+                (u'от 27 до 30', 'reach_age_27_30'),
+                (u'от 30 до 35', 'reach_age_30_35'),
+                (u'от 35 до 45', 'reach_age_35_45'),
+                (u'от 45', 'reach_age_45'),
+            ),
+        },
+        'activity': {
+            'likes': (
+                (u'Мне нравится', 'likes'),
+                (u'Комментарии', 'comments'),
+                (u'Рассказать друзьям', 'shares'),
+                (u'Упоминания', 'references'),
+                (u'Скрыли из новостей', 'hidings')
+            ),
+            'activity': (
+                (u'Сообщения на стене', 'activity_wall'),
+                (u'Фотографии', 'activity_photos'),
+                (u'Комментарии к фотографиям', 'activity_photo_comments'),
+                (u'Видеозаписи', 'activity_videos'),
+                (u'Комментарии к видеозаписям', 'activity_video_comments'),
+                (u'Темы обсуждений', 'activity_topics'),
+                (u'Комментарии к обсуждениям', 'activity_topic_comments'),
+            ),
+        }
+    }
+
     def parse_statistic_page(self, group, section, content):
 
         if 'cur.graphDatas' in content:
@@ -65,116 +169,12 @@ class GroupStatManager(models.Manager):
         else:
             raise VkontakteContentError("Response doesn't contain graphs:\n\n %s" % content)
 
-        fields_map = {
-            '': {
-                'visitors': (
-                    (u'уникальные посетители', 'visitors'),
-                    (u'просмотры', 'views'),
-                ),
-                'gender': (
-                    (u'женщины', 'females'),
-                    (u'мужчины', 'males'),
-                ),
-                'age': (
-                    (u'до 18', 'age_18'),
-                    (u'от 18 до 21', 'age_18_21'),
-                    (u'от 21 до 24', 'age_21_24'),
-                    (u'от 24 до 27', 'age_24_27'),
-                    (u'от 27 до 30', 'age_27_30'),
-                    (u'от 30 до 35', 'age_30_35'),
-                    (u'от 35 до 45', 'age_35_45'),
-                    (u'от 45', 'age_45'),
-                ),
-                'ads': (
-                    (u'Зашедшие с рекламы', 'ads_visitors'),
-                    (u'Вступившие с рекламы', 'ads_members'),
-                    (u'Зашедшие с акций', 'act_visitors'),
-                    (u'Вступившие с акции', 'act_members'),
-                ),
-                'members': (
-                    (u'Новые участники', 'new_members'),
-                    (u'Вышедшие участники', 'ex_members'),
-                    (u'Всего участников', 'members'),
-                ),
-                'widget': (
-                    (u'Просмотры пользователей ВКонтакте', 'widget_users_views'),
-                    (u'Просмотры участников группы', 'widget_members_views'),
-                    (u'Новые участники', 'widget_new_users'),
-                    (u'Вышедшие участники', 'widget_ex_users'),
-                ),
-                'sections': (
-                    (u'Обсуждения', 'section_discussions'),
-                    (u'Аудиозаписи', 'section_audio'),
-                    (u'Видеозаписи', 'section_video'),
-                    (u'Фотоальбомы', 'section_photoalbums'),
-                    # VK убрал график после разделения графиков на вкладки cocacola 2012-12-18
-#                    (u'Приложения', 'section_applications'),
-                    (u'Документы', 'section_documents'),
-                ),
-                'sources': (
-                    (u'Реклама', 'sources_ads'),
-                    (u'Поисковые системы', 'sources_search_systems'),
-                    (u'Внешние сайты', 'sources_external_sites'),
-                    (u'Мои группы', 'sources_my_groups'),
-                    (u'Рекомендации', 'sources_recomendation'),
-                    (u'Новости', 'sources_news'),
-                    (u'Топ сообществ', 'sources_top'),
-                    (u'Результаты поиска ВК', 'sources_search_results'),
-                    (u'Страницы пользователей', 'sources_users'),
-                    (u'Страницы сообществ', 'sources_groups'),
-                    (u'Приложения', 'sources_applications'),
-                    (u'Специальные предложения', 'sources_special_offers'),
-                    (u'Виджет сообществ', 'sources_community_widget'),
-                    (u'Аудиозаписи', 'sources_audio'),
-                    (u'Браузерные закладки', 'sources_favorites'),
-                ),
-            },
-            'reach': {
-                'reach': (
-                    (u'Полный охват', 'reach'),
-                    (u'Охват подписчиков', 'reach_subsribers'),
-                ),
-                'gender': (
-                    (u'женщины', 'reach_females'),
-                    (u'мужчины', 'reach_males'),
-                ),
-                'age': (
-                    (u'до 18', 'reach_age_18'),
-                    (u'от 18 до 21', 'reach_age_18_21'),
-                    (u'от 21 до 24', 'reach_age_21_24'),
-                    (u'от 24 до 27', 'reach_age_24_27'),
-                    (u'от 27 до 30', 'reach_age_27_30'),
-                    (u'от 30 до 35', 'reach_age_30_35'),
-                    (u'от 35 до 45', 'reach_age_35_45'),
-                    (u'от 45', 'reach_age_45'),
-                ),
-            },
-            'activity': {
-                'likes': (
-                    (u'Мне нравится', 'likes'),
-                    (u'Комментарии', 'comments'),
-                    (u'Рассказать друзьям', 'shares'),
-                    (u'Упоминания', 'references'),
-                    (u'Скрыли из новостей', 'hidings')
-                ),
-                'activity': (
-                    (u'Сообщения на стене', 'activity_wall'),
-                    (u'Фотографии', 'activity_photos'),
-                    (u'Комментарии к фотографиям', 'activity_photo_comments'),
-                    (u'Видеозаписи', 'activity_videos'),
-                    (u'Комментарии к видеозаписям', 'activity_video_comments'),
-                    (u'Темы обсуждений', 'activity_topics'),
-                    (u'Комментарии к обсуждениям', 'activity_topic_comments'),
-                ),
-            }
-        }
-        data = {}
-
         graphs = [json.loads(graph) for graph in graphs]
         graph_data = {}
+        graph_data_month = {}
 
         # make list graph_data from parsed data using fields_map dict
-        for key, names in fields_map[section].items():
+        for key, names in self.fields_map[section].items():
             new_key = section + '_' + key
             for i, graph in enumerate(graphs):
                 if isinstance(graph[0], dict) and len(graph) == len(names) and graph[0]['name'].lower() == names[0][0].lower():
@@ -187,9 +187,35 @@ class GroupStatManager(models.Manager):
                         break
                     elif key in ['age','visitors','reach']:
                         graph_data[new_key] = graph[0]
+                        # monthly data for visitors, reach
+                        if key in ['visitors','reach']:
+                            try:
+                                graph_data_month[new_key] = graph[1]
+                            except IndexError:
+                                pass
                         graphs.pop(i)
                         break
 
+        # save monthly statistic
+        data_month = self._prepare_graph_data(graph_data_month)
+        self._save_group_statistic_for_period(group, data_month, period=30)
+
+        # save and return daily statistic
+        data = self._prepare_graph_data(graph_data)
+        return self._save_group_statistic_for_period(group, data, period=1)
+
+    def _save_group_statistic_for_period(self, group, data, period):
+        groupstats = []
+        for stat_date, values in data.items():
+            groupstat = self.model.objects.get_or_create(group=group, date=stat_date, period=period)[0]
+            groupstat.__dict__.update(values)
+            groupstat.save()
+
+            groupstats += [groupstat]
+        return groupstats
+
+    def _prepare_graph_data(self, graph_data):
+        data = {}
         for key, graph_set in graph_data.iteritems():
             section, key = key.split('_')
             for graph in graph_set:
@@ -197,7 +223,7 @@ class GroupStatManager(models.Manager):
                     continue
 
                 try:
-                    field = dict(fields_map[section][key])[graph['name']]
+                    field = dict(self.fields_map[section][key])[graph['name']]
                 except KeyError:
                     log.error("Can't find field name for GroupStat model for graph %s" % graph['name'])
                     continue
@@ -210,19 +236,57 @@ class GroupStatManager(models.Manager):
                         data[stat_date].update(pair)
                     else:
                         data[stat_date] = pair
-
-        groupstats = []
-        # save statistic
-        for stat_date, values in data.items():
-            groupstat = self.model.objects.get_or_create(group=group, date=stat_date)[0]
-            groupstat.__dict__.update(values)
-            groupstat.save()
-
-            groupstats += [groupstat]
-
-        return groupstats
+        return data
 
 class GroupStatPercentageManager(models.Manager):
+
+    fields_map = {
+        u'мужчины': (1, 'males'),
+        u'женщины': (2, 'females'),
+
+        u'Реклама': (1, 'ads'),
+        u'Поисковые системы': (2, 'search_systems'),
+        u'Внешние сайты': (3, 'external_sites'),
+        u'Мои группы': (4, 'my_groups'),
+        u'Рекомендации': (5, 'recomendation'),
+        u'Новости': (6, 'news'),
+        u'Топ сообществ': (7, 'top'),
+        u'Результаты поиска ВК': (8, 'search_results'),
+        u'Страницы пользователей': (9, 'users'),
+        u'Страницы сообществ': (10, 'groups'),
+        u'Приложения': (11, 'applications'),
+        u'Специальные предложения': (12, 'special_offers'),
+        u'Виджет сообществ': (13, 'community_widget'),
+        u'Аудиозаписи': (14, 'audio'),
+        u'Браузерные закладки': (15, 'favorites'),
+
+        u'до 18':        (1, '_18'),
+        u'от 18 до 21':  (2, '18_21'),
+        u'от 21 до 24':  (3, '21_24'),
+        u'от 24 до 27':  (4, '24_27'),
+        u'от 27 до 30':  (5, '27_30'),
+        u'от 30 до 35':  (6, '30_35'),
+        u'от 35 до 45':  (7, '35_45'),
+        u'от 45':        (8, '45_'),
+
+        u'мужчины до 18':        (1, 'males__18'),
+        u'мужчины от 18 до 21':  (2, 'males_18_21'),
+        u'мужчины от 21 до 24':  (3, 'males_21_24'),
+        u'мужчины от 24 до 27':  (4, 'males_24_27'),
+        u'мужчины от 27 до 30':  (5, 'males_27_30'),
+        u'мужчины от 30 до 35':  (6, 'males_30_35'),
+        u'мужчины от 35 до 45':  (7, 'males_35_45'),
+        u'мужчины от 45':        (8, 'males_45_'),
+
+        u'женщины до 18':        (1, 'females__18'),
+        u'женщины от 18 до 21':  (2, 'females_18_21'),
+        u'женщины от 21 до 24':  (3, 'females_21_24'),
+        u'женщины от 24 до 27':  (4, 'females_24_27'),
+        u'женщины от 27 до 30':  (5, 'females_27_30'),
+        u'женщины от 30 до 35':  (6, 'females_30_35'),
+        u'женщины от 35 до 45':  (7, 'females_35_45'),
+        u'женщины от 45':        (8, 'females_45_'),
+    }
 
     def update_for_group_users(self, group):
 
@@ -294,53 +358,6 @@ class GroupStatPercentageManager(models.Manager):
     def parse_statistic_page(self, group, section, content):
         graphs = re.findall(r'cur.invokeSvgFunction\(\'(.+)_chart\', \'loadData\', \[\[([^\]]+)\]\]\)', content)
 
-        fields_map = {
-            u'мужчины': (1, 'males'),
-            u'женщины': (2, 'females'),
-
-            u'Реклама': (1, 'ads'),
-            u'Поисковые системы': (2, 'search_systems'),
-            u'Внешние сайты': (3, 'external_sites'),
-            u'Мои группы': (4, 'my_groups'),
-            u'Рекомендации': (5, 'recomendation'),
-            u'Новости': (6, 'news'),
-            u'Топ сообществ': (7, 'top'),
-            u'Результаты поиска ВК': (8, 'search_results'),
-            u'Страницы пользователей': (9, 'users'),
-            u'Страницы сообществ': (10, 'groups'),
-            u'Приложения': (11, 'applications'),
-            u'Специальные предложения': (12, 'special_offers'),
-            u'Виджет сообществ': (13, 'community_widget'),
-            u'Аудиозаписи': (14, 'audio'),
-            u'Браузерные закладки': (15, 'favorites'),
-
-            u'до 18':        (1, '_18'),
-            u'от 18 до 21':  (2, '18_21'),
-            u'от 21 до 24':  (3, '21_24'),
-            u'от 24 до 27':  (4, '24_27'),
-            u'от 27 до 30':  (5, '27_30'),
-            u'от 30 до 35':  (6, '30_35'),
-            u'от 35 до 45':  (7, '35_45'),
-            u'от 45':        (8, '45_'),
-
-            u'мужчины до 18':        (1, 'males__18'),
-            u'мужчины от 18 до 21':  (2, 'males_18_21'),
-            u'мужчины от 21 до 24':  (3, 'males_21_24'),
-            u'мужчины от 24 до 27':  (4, 'males_24_27'),
-            u'мужчины от 27 до 30':  (5, 'males_27_30'),
-            u'мужчины от 30 до 35':  (6, 'males_30_35'),
-            u'мужчины от 35 до 45':  (7, 'males_35_45'),
-            u'мужчины от 45':        (8, 'males_45_'),
-
-            u'женщины до 18':        (1, 'females__18'),
-            u'женщины от 18 до 21':  (2, 'females_18_21'),
-            u'женщины от 21 до 24':  (3, 'females_21_24'),
-            u'женщины от 24 до 27':  (4, 'females_24_27'),
-            u'женщины от 27 до 30':  (5, 'females_27_30'),
-            u'женщины от 30 до 35':  (6, 'females_30_35'),
-            u'женщины от 35 до 45':  (7, 'females_35_45'),
-            u'женщины от 45':        (8, 'females_45_'),
-        }
         stats = []
         for graph in graphs:
 
@@ -360,8 +377,8 @@ class GroupStatPercentageManager(models.Manager):
                 type += graph[0]
 
                 try:
-                    order = fields_map[name][0]
-                    value_type = fields_map[name][1]
+                    order = self.fields_map[name][0]
+                    value_type = self.fields_map[name][1]
                     if 'females_' in value_type:
                         value_type = value_type.replace('females_','')
                         type += '_females'
@@ -611,11 +628,12 @@ class GroupStat(GroupStatisticAbstract):
     class Meta:
         verbose_name = _('Vkontakte group statistic')
         verbose_name_plural = _('Vkontakte group statistics')
-        unique_together = ('group','date')
-        ordering = ('group','date')
+        unique_together = ('group','date','period')
+        ordering = ('group','period','date')
 
     group = models.ForeignKey(Group, verbose_name=u'Группа', related_name='statistics')
     date = models.DateField(u'Дата')
+    period = models.PositiveSmallIntegerField(u'Период', choices=((1, u'День'),(30, u'Месяц'),), default=1, db_index=True)
 
     objects = GroupStatManager()
 
