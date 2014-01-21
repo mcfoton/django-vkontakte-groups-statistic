@@ -93,7 +93,7 @@ class GroupStatManager(models.Manager):
                 (u'Документы', 'section_documents'),
             ),
             'sources': (
-                (u'Реклама', 'sources_ads'),
+                (u'Таргетированная реклама', 'sources_ads'),
                 (u'Поисковые системы', 'sources_search_systems'),
                 (u'Внешние сайты', 'sources_external_sites'),
                 (u'Мои группы', 'sources_my_groups'),
@@ -645,7 +645,7 @@ class GroupStatPercentage(models.Model):
         ordering = ('group','-type','order')
 
     group = models.ForeignKey(Group, verbose_name=u'Группа', related_name='percentage_statistics')
-    type = models.CharField(max_length=15)
+    type = models.CharField(max_length=50)
     value_type = models.CharField(max_length=100)
     value_name = models.CharField(max_length=100)
     order = models.PositiveIntegerField(u'Порядок', default=0)
