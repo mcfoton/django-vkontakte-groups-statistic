@@ -17,25 +17,28 @@ log = logging.getLogger('vkontakte_groups_statistic')
 
 group_statistic_page_parsed = Signal(providing_args=['instance'])
 
-def fetch_statistic_for_group(group, api=False):
+def fetch_statistic_for_group(group, source='parser'):
     '''
     Get html page with statistic charts and parse it
     '''
-    if api:
+    if source == 'api':
         GroupStatistic.remote.fetch_for_group(group)
-    else:
+
+    elif source == 'parser':
         vk = VkontakteAccessToken(tag='groups_statistic')
         for act in ['','reach','activity']:
             response = vk.authorized_request(url='http://vk.com/stats?act=%s&gid=%d' % (act, group.remote_id), headers={'User-Agent': 'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/28.0.1500.52 Chrome/28.0.1500.52 Safari/537.36'})
             content = response.content.decode('windows-1251')
 
             if u'У Вас нет прав на просмотр этой страницы.' in content:
-                raise VkontakteDeniedAccessError("User doesn't have rights to see statistic of this group ID=%s" % group.pk)
+                raise VkontakteDeniedAccessError("User doesn't have rights to see statistic of this group ID=%s" % group.remote_id)
 
             if u'Чтобы просматривать эту страницу, нужно зайти на сайт.' in content:
-                raise VkontakteDeniedAccessError("Authorization for group ID=%s was unsuccessful" % group.pk)
+                raise VkontakteDeniedAccessError("Authorization for group ID=%s was unsuccessful" % group.remote_id)
 
             parse_statistic_for_group(group, act, content)
+    else:
+        raise ValueError("Argument `source` should be 'api' or 'parser', not '%s'" % source)
 
     return True
 

@@ -49,7 +49,7 @@ Django Vkontakte Groups Statistic
 
     >>> from vkontakte_groups.models import Group
     >>> group = Group.remote.fetch(ids=[16297716])[0]
-    >>> group.fetch_statistic(api=True)
+    >>> group.fetch_statistic(source='api')
 
 Статистика, полученная через API доступна через менеджер
 
