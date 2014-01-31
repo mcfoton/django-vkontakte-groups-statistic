@@ -17,15 +17,15 @@ log = logging.getLogger('vkontakte_groups_statistic')
 
 group_statistic_page_parsed = Signal(providing_args=['instance'])
 
-def fetch_statistic_for_group(group, source='parser'):
+def fetch_statistic_for_group(group, source='parser', **kwargs):
     '''
     Get html page with statistic charts and parse it
     '''
     if source == 'api':
-        GroupStatistic.remote.fetch_for_group(group)
+        GroupStatistic.remote.fetch_for_group(group, **kwargs)
 
     elif source == 'parser':
-        vk = VkontakteAccessToken(tag='groups_statistic')
+        vk = VkontakteAccessToken(tag=kwargs.get('methods_access_tag'))
         for act in ['','reach','activity']:
             response = vk.authorized_request(url='http://vk.com/stats?act=%s&gid=%d' % (act, group.remote_id), headers={'User-Agent': 'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/28.0.1500.52 Chrome/28.0.1500.52 Safari/537.36'})
             content = response.content.decode('windows-1251')
@@ -315,8 +315,8 @@ class GroupStatPercentageManager(models.Manager):
                 (2, 'no_mobile', u'Не указали мобильный', group.users.filter(has_mobile=False).count()),
             )
             users['avatar'] = (
-                (1, 'has_avatar', u'С аватаром', group.users.has_avatars().count()),
-                (2, 'no_avatar', u'Без аватара', group.users.no_avatars().count()),
+                (1, 'has_avatar', u'С аватаром', group.users.with_avatar().count()),
+                (2, 'no_avatar', u'Без аватара', group.users.without_avatar().count()),
                 (3, 'deactivated', u'Заблокированные', group.users.deactivated().count()),
             )
             users['rate'] = (
@@ -417,14 +417,14 @@ class GroupStatPercentageManager(models.Manager):
 
 class GroupStatisticRemoteManager(VkontakteManager):
 
-    def fetch_for_group(self, group, date_from=None, date_to=None):
+    def fetch_for_group(self, group, date_from=None, date_to=None, **kwargs):
 
         if not date_from:
             date_from = datetime(2000,1,1).strftime('%Y-%m-%d')
         if not date_to:
             date_to = datetime.today().strftime('%Y-%m-%d')
 
-        return self.fetch(group=group, date_from=date_from, date_to=date_to)
+        return self.fetch(group=group, date_from=date_from, date_to=date_to, **kwargs)
 
     def fetch(self, **kwargs):
 
