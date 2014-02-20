@@ -446,7 +446,6 @@ class GroupStatistic(VkontakteModel):
         verbose_name = _('Vkontakte group API statistic')
         verbose_name_plural = _('Vkontakte group API statistics')
         unique_together = ('group','date')
-        ordering = ('group','date')
 
     methods_namespace = 'stats'
 
@@ -631,11 +630,10 @@ class GroupStat(GroupStatisticAbstract):
     class Meta:
         verbose_name = _('Vkontakte group statistic')
         verbose_name_plural = _('Vkontakte group statistics')
-        unique_together = ('group','date','period')
-        ordering = ('group','period','date')
+        unique_together = ('group', 'date', 'period')
 
     group = models.ForeignKey(Group, verbose_name=u'Группа', related_name='statistics')
-    date = models.DateField(u'Дата')
+    date = models.DateField(u'Дата', db_index=True)
     period = models.PositiveSmallIntegerField(u'Период', choices=((1, u'День'),(30, u'Месяц'),), default=1, db_index=True)
 
     objects = GroupStatManager()
@@ -645,7 +643,6 @@ class GroupStatPercentage(models.Model):
         verbose_name = _('Vkontakte group percetage statistic')
         verbose_name_plural = _('Vkontakte group percetage statistics')
         unique_together = ('group','type','value_type')
-        ordering = ('group','-type','order')
 
     group = models.ForeignKey(Group, verbose_name=u'Группа', related_name='percentage_statistics')
     type = models.CharField(max_length=50)
