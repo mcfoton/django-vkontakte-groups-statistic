@@ -2,6 +2,7 @@
 from django.test import TestCase
 from models import GroupStat, GroupStatistic
 from vkontakte_groups.factories import GroupFactory
+from datetime import datetime, timedelta
 
 GROUP_ID = 1
 
@@ -13,15 +14,29 @@ class VkontakteGroupsStatisticTest(TestCase):
         self.assertEqual(GroupStat.objects.count(), 0)
 
         group.fetch_statistic()
-        self.assertNotEqual(GroupStat.objects.count(), 0)
+        self.assertTrue(GroupStat.objects.count() > 350)
 
-        stat = GroupStat.objects.all()[0]
+        stat = GroupStat.objects.filter(period=30)[0]
+        self.assertTrue(stat.views > 0)
+        self.assertTrue(stat.visitors > 0)
+        self.assertNotEqual(stat.date, None)
+
+        stat = GroupStat.objects.filter(period=1)[0]
         self.assertTrue(stat.members > 0)
         self.assertTrue(stat.views > 0)
         self.assertTrue(stat.visitors > 0)
         self.assertTrue(stat.males > 0)
         self.assertTrue(stat.females > 0)
         self.assertNotEqual(stat.date, None)
+
+        # test after argument
+        after = datetime.now() - timedelta(5)
+        stat_month_count = GroupStat.objects.filter(period=30).count()
+        GroupStat.objects.all().delete()
+
+        group.fetch_statistic(after=after)
+        self.assertEqual(GroupStat.objects.filter(period=1).count(), 6)
+        self.assertEqual(GroupStat.objects.filter(period=30).count(), stat_month_count)
 
     def test_fetch_statistic_via_api(self):
 

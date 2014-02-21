@@ -36,16 +36,17 @@ def fetch_statistic_for_group(group, source='parser', **kwargs):
             if u'Чтобы просматривать эту страницу, нужно зайти на сайт.' in content:
                 raise VkontakteDeniedAccessError("Authorization for group ID=%s was unsuccessful" % group.remote_id)
 
-            parse_statistic_for_group(group, act, content)
+            parse_statistic_for_group(group, act, content, **kwargs)
+
+        group_statistic_page_parsed.send(sender=Group, instance=group)
     else:
         raise ValueError("Argument `source` should be 'api' or 'parser', not '%s'" % source)
 
     return True
 
-def parse_statistic_for_group(group, act, content):
-    GroupStat.objects.parse_statistic_page(group, act, content)
-    GroupStatPercentage.objects.parse_statistic_page(group, act, content)
-    group_statistic_page_parsed.send(sender=Group, instance=group)
+def parse_statistic_for_group(group, act, content, **kwargs):
+    GroupStat.objects.parse_statistic_page(group, act, content, **kwargs)
+    GroupStatPercentage.objects.parse_statistic_page(group, act, content, **kwargs)
 
 class GroupStatManager(models.Manager):
 
@@ -153,7 +154,7 @@ class GroupStatManager(models.Manager):
         }
     }
 
-    def parse_statistic_page(self, group, section, content):
+    def parse_statistic_page(self, group, section, content, after=None, **kwargs):
 
         if 'cur.graphDatas' in content:
             graphs = re.findall(r'cur.graphDatas\[\'([^\']+)\'\] = \'([^\']+)\'', content)
@@ -204,20 +205,20 @@ class GroupStatManager(models.Manager):
         self._save_group_statistic_for_period(group, data_month, period=30)
 
         # save and return daily statistic
-        data = self._prepare_graph_data(graph_data)
+        data = self._prepare_graph_data(graph_data, after)
         return self._save_group_statistic_for_period(group, data, period=1)
 
     def _save_group_statistic_for_period(self, group, data, period):
         groupstats = []
         for stat_date, values in data.items():
-            groupstat = self.model.objects.get_or_create(group=group, date=stat_date, period=period)[0]
-            groupstat.__dict__.update(values)
-            groupstat.save()
-
+            groupstat, created = self.get_or_create(group=group, date=stat_date, period=period, defaults=values)
+            if not created:
+                groupstat.__dict__.update(values)
+                groupstat.save()
             groupstats += [groupstat]
         return groupstats
 
-    def _prepare_graph_data(self, graph_data):
+    def _prepare_graph_data(self, graph_data, after=None):
         data = {}
         for key, graph_set in graph_data.iteritems():
             section, key = key.split('_')
@@ -233,6 +234,11 @@ class GroupStatManager(models.Manager):
 
                 for values in graph['d']:
                     stat_date = datetime.fromtimestamp(values[0]).date()
+                    if after:
+                        after = after.date() if isinstance(after, datetime) else after
+                        if stat_date < after:
+                            continue
+
                     value = values[1]
                     pair = {field: value}
                     if stat_date in data:
@@ -348,17 +354,21 @@ class GroupStatPercentageManager(models.Manager):
         stats = []
         for type, parts in users.items():
             for order, value_type, name, value in parts:
-                stat = self.get_or_create(group=group, type=type, value_type=value_type)[0]
-                stat.order = order
-                stat.value_name = name
-                stat.value = value
-                stat.percents = 100*float(value)/total_count
-                stat.save()
+                values = {
+                    'order': order,
+                    'value_name': name,
+                    'value': value,
+                    'percents': 100 * float(value) / total_count,
+                }
+                stat, created = self.get_or_create(group=group, type=type, value_type=value_type, defaults=values)
+                if not created:
+                    stat.__dict__.update(values)
+                    stat.save()
                 stats += [stat]
 
         return stats
 
-    def parse_statistic_page(self, group, section, content):
+    def parse_statistic_page(self, group, section, content, **kwargs):
         graphs = re.findall(r'cur.invokeSvgFunction\(\'(.+)_chart\', \'loadData\', \[\[([^\]]+)\]\]\)', content)
 
         stats = []
@@ -407,10 +417,10 @@ class GroupStatPercentageManager(models.Manager):
         groupstats = []
         # save statistic
         for stat in stats:
-            groupstat = self.model.objects.get_or_create(group=group, type=stat['type'], value_type=stat['value_type'])[0]
-            groupstat.__dict__.update(stat)
-            groupstat.save()
-
+            groupstat, created = self.get_or_create(group=group, type=stat.pop('type'), value_type=stat.pop('value_type'), defaults=stat)
+            if not created:
+                groupstat.__dict__.update(stat)
+                groupstat.save()
             groupstats += [groupstat]
 
         return groupstats
