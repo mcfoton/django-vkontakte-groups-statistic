@@ -234,10 +234,9 @@ class GroupStatManager(models.Manager):
 
                 for values in graph['d']:
                     stat_date = datetime.fromtimestamp(values[0]).date()
-                    if after:
-                        after = after.date() if isinstance(after, datetime) else after
-                        if stat_date < after:
-                            continue
+                    after = after.date() if isinstance(after, datetime) else after
+                    if after and stat_date < after:
+                        continue
 
                     value = values[1]
                     pair = {field: value}
