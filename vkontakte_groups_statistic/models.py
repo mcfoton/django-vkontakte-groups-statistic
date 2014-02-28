@@ -4,7 +4,7 @@ from django.dispatch import Signal
 from django.conf import settings
 from django.utils.translation import ugettext as _
 from django.core.exceptions import ImproperlyConfigured
-from vkontakte_api.models import VkontakteManager, VkontakteModel, VkontakteIDModel, VkontakteDeniedAccessError, VkontakteContentError
+from vkontakte_api.models import VkontakteManager, VkontakteModel, VkontakteDeniedAccessError, VkontakteContentError
 from vkontakte_groups.models import Group
 from oauth_tokens.providers.vkontakte import VkontakteAccessToken
 from datetime import datetime
@@ -154,7 +154,7 @@ class GroupStatManager(models.Manager):
         }
     }
 
-    def parse_statistic_page(self, group, section, content, after=None, **kwargs):
+    def parse_statistic_page(self, group, section, content, date_from=None, **kwargs):
 
         if 'cur.graphDatas' in content:
             graphs = re.findall(r'cur.graphDatas\[\'([^\']+)\'\] = \'([^\']+)\'', content)
@@ -205,7 +205,7 @@ class GroupStatManager(models.Manager):
         self._save_group_statistic_for_period(group, data_month, period=30)
 
         # save and return daily statistic
-        data = self._prepare_graph_data(graph_data, after)
+        data = self._prepare_graph_data(graph_data, date_from)
         return self._save_group_statistic_for_period(group, data, period=1)
 
     def _save_group_statistic_for_period(self, group, data, period):
@@ -218,7 +218,7 @@ class GroupStatManager(models.Manager):
             groupstats += [groupstat]
         return groupstats
 
-    def _prepare_graph_data(self, graph_data, after=None):
+    def _prepare_graph_data(self, graph_data, date_from=None):
         data = {}
         for key, graph_set in graph_data.iteritems():
             section, key = key.split('_')
@@ -234,8 +234,8 @@ class GroupStatManager(models.Manager):
 
                 for values in graph['d']:
                     stat_date = datetime.fromtimestamp(values[0]).date()
-                    after = after.date() if isinstance(after, datetime) else after
-                    if after and stat_date < after:
+                    date_from = date_from.date() if isinstance(date_from, datetime) else date_from
+                    if date_from and stat_date < date_from:
                         continue
 
                     value = values[1]
@@ -604,17 +604,17 @@ class GroupStatisticAbstract(models.Model):
     age_35_45 = models.PositiveIntegerField(u'От 35 до 45', null=True)
     age_45 = models.PositiveIntegerField(u'От 45', null=True)
 
-    reach_males = models.PositiveIntegerField(u'Мужчины', null=True)
-    reach_females = models.PositiveIntegerField(u'Женщины', null=True)
+    reach_males = models.PositiveIntegerField(u'Охват по мужчинам', null=True)
+    reach_females = models.PositiveIntegerField(u'Охват по женщинам', null=True)
 
-    reach_age_18 = models.PositiveIntegerField(u'До 18', null=True)
-    reach_age_18_21 = models.PositiveIntegerField(u'От 18 до 21', null=True)
-    reach_age_21_24 = models.PositiveIntegerField(u'От 21 до 24', null=True)
-    reach_age_24_27 = models.PositiveIntegerField(u'От 24 до 27', null=True)
-    reach_age_27_30 = models.PositiveIntegerField(u'От 27 до 30', null=True)
-    reach_age_30_35 = models.PositiveIntegerField(u'От 30 до 35', null=True)
-    reach_age_35_45 = models.PositiveIntegerField(u'От 35 до 45', null=True)
-    reach_age_45 = models.PositiveIntegerField(u'От 45', null=True)
+    reach_age_18 = models.PositiveIntegerField(u'Охват по возрасту до 18', null=True)
+    reach_age_18_21 = models.PositiveIntegerField(u'Охват по возрасту от 18 до 21', null=True)
+    reach_age_21_24 = models.PositiveIntegerField(u'Охват по возрасту от 21 до 24', null=True)
+    reach_age_24_27 = models.PositiveIntegerField(u'Охват по возрасту от 24 до 27', null=True)
+    reach_age_27_30 = models.PositiveIntegerField(u'Охват по возрасту от 27 до 30', null=True)
+    reach_age_30_35 = models.PositiveIntegerField(u'Охват по возрасту от 30 до 35', null=True)
+    reach_age_35_45 = models.PositiveIntegerField(u'Охват по возрасту от 35 до 45', null=True)
+    reach_age_45 = models.PositiveIntegerField(u'Охват по возрасту от 45', null=True)
 
     sources_ads = models.PositiveIntegerField(u'Реклама', null=True)
     sources_search_systems = models.PositiveIntegerField(u'Поисковые системы', null=True)
@@ -643,7 +643,7 @@ class GroupStat(GroupStatisticAbstract):
 
     group = models.ForeignKey(Group, verbose_name=u'Группа', related_name='statistics')
     date = models.DateField(u'Дата', db_index=True)
-    period = models.PositiveSmallIntegerField(u'Период', choices=((1, u'День'),(30, u'Месяц'),), default=1, db_index=True)
+    period = models.PositiveSmallIntegerField(u'Период', choices=((1, u'День'), (30, u'Месяц')), default=1, db_index=True)
 
     objects = GroupStatManager()
 

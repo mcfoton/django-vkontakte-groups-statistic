@@ -29,12 +29,12 @@ class VkontakteGroupsStatisticTest(TestCase):
         self.assertTrue(stat.females > 0)
         self.assertNotEqual(stat.date, None)
 
-        # test after argument
-        after = datetime.now() - timedelta(5)
+        # test date_from argument
+        date_from = datetime.now() - timedelta(5)
         stat_month_count = GroupStat.objects.filter(period=30).count()
         GroupStat.objects.all().delete()
 
-        group.fetch_statistic(after=after)
+        group.fetch_statistic(date_from=date_from)
         self.assertEqual(GroupStat.objects.filter(period=1).count(), 6)
         self.assertEqual(GroupStat.objects.filter(period=30).count(), stat_month_count)
 
