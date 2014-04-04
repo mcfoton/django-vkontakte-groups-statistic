@@ -268,6 +268,9 @@ class GroupStatPercentageManager(models.Manager):
         u'Аудиозаписи': (14, 'audio'),
         u'Браузерные закладки': (15, 'favorites'),
 
+        u'Просмотры с компьютеров': (1, 'views_from_pc'),
+        u'Просмотры с мобильных': (2, 'views_from_mobile'),
+
         u'до 18':        (1, '_18'),
         u'от 18 до 21':  (2, '18_21'),
         u'от 21 до 24':  (3, '21_24'),
