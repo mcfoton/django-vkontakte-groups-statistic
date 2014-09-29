@@ -98,6 +98,7 @@ class GroupStatManager(models.Manager):
             ),
             'sources': (
                 (u'Таргетированная реклама', 'sources_ads'),
+                (u'Прямые ссылки', 'sources_links'),
                 (u'Поисковые системы', 'sources_search_systems'),
                 (u'Внешние сайты', 'sources_external_sites'),
                 (u'Мои группы', 'sources_my_groups'),
@@ -620,6 +621,7 @@ class GroupStatisticAbstract(models.Model):
     reach_age_45 = models.PositiveIntegerField(u'Охват по возрасту от 45', null=True)
 
     sources_ads = models.PositiveIntegerField(u'Реклама', null=True)
+    sources_links = models.PositiveIntegerField(u'Прямые ссылки', null=True)
     sources_search_systems = models.PositiveIntegerField(u'Поисковые системы', null=True)
     sources_external_sites = models.PositiveIntegerField(u'Внешние сайты', null=True)
     sources_my_groups = models.PositiveIntegerField(u'Мои группы', null=True)
