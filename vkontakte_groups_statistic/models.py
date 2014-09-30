@@ -98,7 +98,6 @@ class GroupStatManager(models.Manager):
             ),
             'sources': (
                 (u'Таргетированная реклама', 'sources_ads'),
-                (u'Прямые ссылки', 'sources_links'),
                 (u'Поисковые системы', 'sources_search_systems'),
                 (u'Внешние сайты', 'sources_external_sites'),
                 (u'Мои группы', 'sources_my_groups'),
@@ -112,7 +111,7 @@ class GroupStatManager(models.Manager):
                 (u'Специальные предложения', 'sources_special_offers'),
                 (u'Виджет сообществ', 'sources_community_widget'),
                 (u'Аудиозаписи', 'sources_audio'),
-                (u'Браузерные закладки', 'sources_favorites'),
+                (u'Прямые ссылки', 'sources_favorites'),
             ),
         },
         'reach': {
@@ -267,7 +266,7 @@ class GroupStatPercentageManager(models.Manager):
         u'Специальные предложения': (12, 'special_offers'),
         u'Виджет сообществ': (13, 'community_widget'),
         u'Аудиозаписи': (14, 'audio'),
-        u'Браузерные закладки': (15, 'favorites'),
+        u'Прямые ссылки': (15, 'favorites'),
 
         u'Просмотры с компьютеров': (1, 'views_from_pc'),
         u'Просмотры с мобильных': (2, 'views_from_mobile'),
@@ -621,7 +620,6 @@ class GroupStatisticAbstract(models.Model):
     reach_age_45 = models.PositiveIntegerField(u'Охват по возрасту от 45', null=True)
 
     sources_ads = models.PositiveIntegerField(u'Реклама', null=True)
-    sources_links = models.PositiveIntegerField(u'Прямые ссылки', null=True)
     sources_search_systems = models.PositiveIntegerField(u'Поисковые системы', null=True)
     sources_external_sites = models.PositiveIntegerField(u'Внешние сайты', null=True)
     sources_my_groups = models.PositiveIntegerField(u'Мои группы', null=True)
@@ -635,7 +633,7 @@ class GroupStatisticAbstract(models.Model):
     sources_special_offers = models.PositiveIntegerField(u'Специальные предложения', null=True)
     sources_community_widget = models.PositiveIntegerField(u'Виджет сообществ', null=True)
     sources_audio = models.PositiveIntegerField(u'Аудиозаписи', null=True)
-    sources_favorites = models.PositiveIntegerField(u'Браузерные закладки', null=True)
+    sources_favorites = models.PositiveIntegerField(u'Прямые ссылки', null=True)
 
 class GroupStat(GroupStatisticAbstract):
     '''
