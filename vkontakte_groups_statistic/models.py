@@ -12,6 +12,7 @@ from urllib import unquote
 import simplejson as json
 import logging
 import re
+import signals
 
 log = logging.getLogger('vkontakte_groups_statistic')
 
@@ -666,3 +667,14 @@ class GroupStatPercentage(models.Model):
     percents = models.FloatField(u'Проценты', null=True)
 
     objects = GroupStatPercentageManager()
+
+class GroupStatisticMembers(models.Model): #TODO назвать модель как следует (сейчас названа так потому что GroupStatistic уже есть)
+    class Meta:
+        verbose_name = "Vkontakte group statistic" #TODO аналогично
+        verbose_name_plural = "Vkontakte group statistics" #TODO аналогично
+        get_latest_by = 'id'
+
+    group = models.ForeignKey(Group, related_name='statistics')
+
+    members = models.IntegerField(editable=False) # strange, but there is possible negative values
+    updated_at = models.DateTimeField(auto_now_add=True, editable=False)
