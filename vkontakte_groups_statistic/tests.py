@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.test import TestCase
-from models import GroupStat, GroupStatistic
+from models import GroupStat, GroupStatistic, GroupStatisticMembers
+from vkontakte_groups.models import Group
 from vkontakte_groups.factories import GroupFactory
 from datetime import datetime, timedelta
 
@@ -52,3 +53,25 @@ class VkontakteGroupsStatisticTest(TestCase):
         self.assertTrue(stat.males > 0)
         self.assertTrue(stat.females > 0)
         self.assertNotEqual(stat.date, None)
+
+class VkontakteGroupsStatisticMembers(TestCase):
+    #TODO rewrite using model other than Group and factory (?)
+    def test_new_members_count_instance(self):
+        count = GroupStatisticMembers.objects.count()
+        Group.remote.fetch(ids=[GROUP_ID])
+        self.assertEqual(GroupStatisticMembers.objects.count(), count+1)
+
+''' and the one below doesn't work. also the one above my new test doesn't work too
+
+    def test_new_members_count_instance(self):
+
+        group = GroupFactory(remote_id=GROUP_ID)
+        self.assertEqual(GroupStatisticMembers.objects.count(), 0)
+
+        group.fetch_statistic(source='api')
+        self.assertNotEqual(GroupStatisticMembers.objects.count(), 0)
+
+        stat = GroupStatisticMembers.objects.all()[0]
+        self.assertTrue(stat.members_count > 0)
+        self.assertNotEqual(stat.updated_at, None)
+'''

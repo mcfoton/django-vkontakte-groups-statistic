@@ -12,7 +12,6 @@ from urllib import unquote
 import simplejson as json
 import logging
 import re
-import signals
 
 log = logging.getLogger('vkontakte_groups_statistic')
 
@@ -94,7 +93,7 @@ class GroupStatManager(models.Manager):
                 (u'Видеозаписи', 'section_video'),
                 (u'Фотоальбомы', 'section_photoalbums'),
                 # VK убрал график после разделения графиков на вкладки cocacola 2012-12-18
-#                    (u'Приложения', 'section_applications'),
+                # (u'Приложения', 'section_applications'),
                 (u'Документы', 'section_documents'),
             ),
             'sources': (
@@ -468,45 +467,45 @@ class GroupStatistic(VkontakteModel):
     visitors = models.PositiveIntegerField(u'Уникальные посетители', null=True)
     views = models.PositiveIntegerField(u'Просмотры', null=True)
 
-#    likes = models.PositiveIntegerField(u'Мне нравится', null=True)
-#    comments = models.PositiveIntegerField(u'Комментарии', null=True)
-#    shares = models.PositiveIntegerField(u'Рассказать друзьям', null=True)
-#    references = models.PositiveIntegerField(u'Упоминания', null=True)
-#
-#    new_members = models.PositiveIntegerField(u'Новые участники', null=True)
-#    ex_members = models.PositiveIntegerField(u'Вышедшие участники', null=True)
-#    members = models.PositiveIntegerField(u'Всего участников', null=True)
-#
-#    reach = models.PositiveIntegerField(u'Полный охват', null=True)
-#    reach_subsribers = models.PositiveIntegerField(u'Охват подписчиков', null=True)
-#
-#    widget_users_views = models.PositiveIntegerField(u'Просмотры пользователей ВКонтакте', null=True)
-#    widget_members_views = models.PositiveIntegerField(u'Просмотры участников группы', null=True)
-#    widget_new_users = models.PositiveIntegerField(u'Новые участники', null=True)
-#    widget_ex_users = models.PositiveIntegerField(u'Вышедшие участники', null=True)
-#
-#    ads_visitors = models.PositiveIntegerField(u'Зашедшие с рекламы', null=True)
-#    ads_members = models.PositiveIntegerField(u'Вступившие с рекламы', null=True)
-#    act_visitors = models.PositiveIntegerField(u'Зашедшие с акций', null=True)
-#    act_members = models.PositiveIntegerField(u'Вступившие с акций', null=True)
+    # likes = models.PositiveIntegerField(u'Мне нравится', null=True)
+    # comments = models.PositiveIntegerField(u'Комментарии', null=True)
+    # shares = models.PositiveIntegerField(u'Рассказать друзьям', null=True)
+    # references = models.PositiveIntegerField(u'Упоминания', null=True)
+    #
+    # new_members = models.PositiveIntegerField(u'Новые участники', null=True)
+    # ex_members = models.PositiveIntegerField(u'Вышедшие участники', null=True)
+    # members = models.PositiveIntegerField(u'Всего участников', null=True)
+    #
+    # reach = models.PositiveIntegerField(u'Полный охват', null=True)
+    # reach_subsribers = models.PositiveIntegerField(u'Охват подписчиков', null=True)
+    #
+    # widget_users_views = models.PositiveIntegerField(u'Просмотры пользователей ВКонтакте', null=True)
+    # widget_members_views = models.PositiveIntegerField(u'Просмотры участников группы', null=True)
+    # widget_new_users = models.PositiveIntegerField(u'Новые участники', null=True)
+    # widget_ex_users = models.PositiveIntegerField(u'Вышедшие участники', null=True)
+    #
+    # ads_visitors = models.PositiveIntegerField(u'Зашедшие с рекламы', null=True)
+    # ads_members = models.PositiveIntegerField(u'Вступившие с рекламы', null=True)
+    # act_visitors = models.PositiveIntegerField(u'Зашедшие с акций', null=True)
+    # act_members = models.PositiveIntegerField(u'Вступившие с акций', null=True)
 
     males = models.PositiveIntegerField(u'Мужчины', null=True)
     females = models.PositiveIntegerField(u'Женщины', null=True)
 
-#    section_discussions = models.PositiveIntegerField(u'Обсуждения', null=True)
-#    section_audio = models.PositiveIntegerField(u'Аудиозаписи', null=True)
-#    section_video = models.PositiveIntegerField(u'Видеозаписи', null=True)
-#    section_photoalbums = models.PositiveIntegerField(u'Фотоальбомы', null=True)
-#    section_applications = models.PositiveIntegerField(u'Приложения', null=True)
-#    section_documents = models.PositiveIntegerField(u'Документы', null=True)
-#
-#    activity_wall = models.PositiveIntegerField(u'Сообщения на стене', null=True)
-#    activity_photos = models.PositiveIntegerField(u'Фотографии', null=True)
-#    activity_photo_comments = models.PositiveIntegerField(u'Комментарии к фотографиям', null=True)
-#    activity_videos = models.PositiveIntegerField(u'Видеозаписи', null=True)
-#    activity_video_comments = models.PositiveIntegerField(u'Комментарии к видеозаписям', null=True)
-#    activity_topics = models.PositiveIntegerField(u'Темы обсуждений', null=True)
-#    activity_topic_comments = models.PositiveIntegerField(u'Комментарии к обсуждениям', null=True)
+    # section_discussions = models.PositiveIntegerField(u'Обсуждения', null=True)
+    # section_audio = models.PositiveIntegerField(u'Аудиозаписи', null=True)
+    # section_video = models.PositiveIntegerField(u'Видеозаписи', null=True)
+    # section_photoalbums = models.PositiveIntegerField(u'Фотоальбомы', null=True)
+    # section_applications = models.PositiveIntegerField(u'Приложения', null=True)
+    # section_documents = models.PositiveIntegerField(u'Документы', null=True)
+    #
+    # activity_wall = models.PositiveIntegerField(u'Сообщения на стене', null=True)
+    # activity_photos = models.PositiveIntegerField(u'Фотографии', null=True)
+    # activity_photo_comments = models.PositiveIntegerField(u'Комментарии к фотографиям', null=True)
+    # activity_videos = models.PositiveIntegerField(u'Видеозаписи', null=True)
+    # activity_video_comments = models.PositiveIntegerField(u'Комментарии к видеозаписям', null=True)
+    # activity_topics = models.PositiveIntegerField(u'Темы обсуждений', null=True)
+    # activity_topic_comments = models.PositiveIntegerField(u'Комментарии к обсуждениям', null=True)
 
     age_18 = models.PositiveIntegerField(u'До 18', null=True)
     age_18_21 = models.PositiveIntegerField(u'От 18 до 21', null=True)
@@ -668,13 +667,18 @@ class GroupStatPercentage(models.Model):
 
     objects = GroupStatPercentageManager()
 
-class GroupStatisticMembers(models.Model): #TODO назвать модель как следует (сейчас названа так потому что GroupStatistic уже есть)
+class GroupStatisticMembers(models.Model):
     class Meta:
-        verbose_name = "Vkontakte group statistic" #TODO аналогично
-        verbose_name_plural = "Vkontakte group statistics" #TODO аналогично
+        verbose_name = "Vkontakte group members statistic"
+        verbose_name_plural = "Vkontakte group members statistics"
         get_latest_by = 'id'
 
-    group = models.ForeignKey(Group, related_name='statistics')
+    group = models.ForeignKey(Group, related_name='statistics_members')
 
-    members = models.IntegerField(editable=False) # strange, but there is possible negative values
+    members_count = models.IntegerField(editable=False)
     updated_at = models.DateTimeField(auto_now_add=True, editable=False)
+
+    def __unicode__(self):
+        return u'%s %s' % (self.group.name, self.updated_at)
+
+import signals
