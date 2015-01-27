@@ -15,19 +15,19 @@ class VkontakteGroupsStatisticTest(TestCase):
         self.assertEqual(GroupStat.objects.count(), 0)
 
         group.fetch_statistic()
-        self.assertTrue(GroupStat.objects.count() > 350)
+        self.assertGreater(GroupStat.objects.count(), 350)
 
         stat = GroupStat.objects.filter(period=30)[0]
-        self.assertTrue(stat.views > 0)
-        self.assertTrue(stat.visitors > 0)
+        self.assertGreater(stat.views, 0)
+        self.assertGreater(stat.visitors, 0)
         self.assertNotEqual(stat.date, None)
 
         stat = GroupStat.objects.filter(period=1)[0]
-        self.assertTrue(stat.members > 0)
-        self.assertTrue(stat.views > 0)
-        self.assertTrue(stat.visitors > 0)
-        self.assertTrue(stat.males > 0)
-        self.assertTrue(stat.females > 0)
+        self.assertGreater(stat.members, 0)
+        self.assertGreater(stat.views, 0)
+        self.assertGreater(stat.visitors, 0)
+        self.assertGreater(stat.males, 0)
+        self.assertGreater(stat.females, 0)
         self.assertNotEqual(stat.date, None)
 
         # test date_from argument
@@ -38,7 +38,7 @@ class VkontakteGroupsStatisticTest(TestCase):
         group.fetch_statistic(date_from=date_from)
         self.assertEqual(GroupStat.objects.filter(period=1).count(), 6)
         self.assertEqual(GroupStat.objects.filter(period=30).count(), stat_month_count)
-
+        
     def test_fetch_statistic_via_api(self):
 
         group = GroupFactory(remote_id=GROUP_ID)
@@ -48,10 +48,10 @@ class VkontakteGroupsStatisticTest(TestCase):
         self.assertNotEqual(GroupStatistic.objects.count(), 0)
 
         stat = GroupStatistic.objects.all()[0]
-        self.assertTrue(stat.views > 0)
-        self.assertTrue(stat.visitors > 0)
-        self.assertTrue(stat.males > 0)
-        self.assertTrue(stat.females > 0)
+        self.assertGreater(stat.views, 0)
+        self.assertGreater(stat.visitors, 0)
+        self.assertGreater(stat.males, 0)
+        self.assertGreater(stat.females, 0)
         self.assertNotEqual(stat.date, None)
 
 class VkontakteGroupsStatisticMembers(TestCase):
@@ -60,10 +60,8 @@ class VkontakteGroupsStatisticMembers(TestCase):
         count = GroupStatisticMembers.objects.count()
         Group.remote.fetch(ids=[GROUP_ID])
         self.assertEqual(GroupStatisticMembers.objects.count(), count+1)
-
-''' and the one below doesn't work. also the one above my new test doesn't work too
-
-    def test_new_members_count_instance(self):
+'''
+    def test_new_members_count_instance_factory(self):
 
         group = GroupFactory(remote_id=GROUP_ID)
         self.assertEqual(GroupStatisticMembers.objects.count(), 0)
