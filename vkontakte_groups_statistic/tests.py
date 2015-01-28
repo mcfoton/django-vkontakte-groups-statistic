@@ -2,12 +2,9 @@
 from datetime import timedelta, date
 
 from django.test import TestCase
-<<<<<<< HEAD
 from models import GroupStat, GroupStatistic, GroupStatisticMembers
 from vkontakte_groups.models import Group
-=======
 from django.utils import timezone
->>>>>>> upstream/master
 from vkontakte_groups.factories import GroupFactory
 
 from .models import GroupStat, GroupStatistic
