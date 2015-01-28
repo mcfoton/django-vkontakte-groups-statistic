@@ -1,21 +1,25 @@
 # -*- coding: utf-8 -*-
-from django.db import models
-from django.dispatch import Signal
-from django.conf import settings
-from django.utils.translation import ugettext as _
-from django.core.exceptions import ImproperlyConfigured
-from vkontakte_api.models import VkontakteManager, VkontakteModel, VkontakteDeniedAccessError, VkontakteContentError
-from vkontakte_groups.models import Group
-from oauth_tokens.providers.vkontakte import VkontakteAccessToken
 from datetime import datetime
-from urllib import unquote
-import simplejson as json
 import logging
 import re
+from urllib import unquote
+
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
+from django.db import models
+from django.dispatch import Signal
+from django.utils import timezone
+from django.utils.translation import ugettext as _
+from oauth_tokens.models import AccessToken
+import simplejson as json
+from vkontakte_api.exceptions import VkontakteDeniedAccessError, VkontakteContentError
+from vkontakte_api.models import VkontakteManager, VkontakteModel
+from vkontakte_groups.models import Group
 
 log = logging.getLogger('vkontakte_groups_statistic')
 
 group_statistic_page_parsed = Signal(providing_args=['instance'])
+
 
 def fetch_statistic_for_group(group, source='parser', **kwargs):
     '''
@@ -25,13 +29,16 @@ def fetch_statistic_for_group(group, source='parser', **kwargs):
         GroupStatistic.remote.fetch_for_group(group, **kwargs)
 
     elif source == 'parser':
-        vk = VkontakteAccessToken(tag=kwargs.get('methods_access_tag'))
-        for act in ['','reach','activity']:
-            response = vk.authorized_request(url='http://vk.com/stats?act=%s&gid=%d' % (act, group.remote_id), headers={'User-Agent': 'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/28.0.1500.52 Chrome/28.0.1500.52 Safari/537.36'})
+        ar = AccessToken.objects.get_token('vkontakte', kwargs.pop('methods_access_tag', None)).auth_request
+
+        for act in ['', 'reach', 'activity']:
+            response = ar.authorized_request(url='http://vk.com/stats?act=%s&gid=%d' % (act, group.remote_id), headers={
+                                             'User-Agent': 'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/28.0.1500.52 Chrome/28.0.1500.52 Safari/537.36'})
             content = response.content.decode('windows-1251')
 
             if u'У Вас нет прав на просмотр этой страницы.' in content:
-                raise VkontakteDeniedAccessError("User doesn't have rights to see statistic of this group ID=%s" % group.remote_id)
+                raise VkontakteDeniedAccessError(
+                    "User doesn't have rights to see statistic of this group ID=%s" % group.remote_id)
 
             if u'Чтобы просматривать эту страницу, нужно зайти на сайт.' in content:
                 raise VkontakteDeniedAccessError("Authorization for group ID=%s was unsuccessful" % group.remote_id)
@@ -44,9 +51,11 @@ def fetch_statistic_for_group(group, source='parser', **kwargs):
 
     return True
 
+
 def parse_statistic_for_group(group, act, content, **kwargs):
     GroupStat.objects.parse_statistic_page(group, act, content, **kwargs)
     GroupStatPercentage.objects.parse_statistic_page(group, act, content, **kwargs)
+
 
 class GroupStatManager(models.Manager):
 
@@ -189,10 +198,10 @@ class GroupStatManager(models.Manager):
                         graph_data[new_key] = graph[0] + graph[1]
                         graphs.pop(i)
                         break
-                    elif key in ['age','visitors','reach']:
+                    elif key in ['age', 'visitors', 'reach']:
                         graph_data[new_key] = graph[0]
                         # monthly data for visitors, reach
-                        if key in ['visitors','reach']:
+                        if key in ['visitors', 'reach']:
                             try:
                                 graph_data_month[new_key] = graph[1]
                             except IndexError:
@@ -245,6 +254,7 @@ class GroupStatManager(models.Manager):
                     else:
                         data[stat_date] = pair
         return data
+
 
 class GroupStatPercentageManager(models.Manager):
 
@@ -312,7 +322,8 @@ class GroupStatPercentageManager(models.Manager):
                 (1, 'has_relations', u'Отношения указаны', group.users.filter(relation__gt=0).count()),
                 (2, 'no_relations', u'Отношения не указаны', group.users.filter(relation=None).count()),
             )
-            users['relations'] = [(rel_pair[0], rel_pair[0], rel_pair[1], group.users.filter(relation=rel_pair[0]).count()) for rel_pair in list(USER_RELATION_CHOICES)]
+            users['relations'] = [(rel_pair[0], rel_pair[0], rel_pair[1], group.users.filter(
+                relation=rel_pair[0]).count()) for rel_pair in list(USER_RELATION_CHOICES)]
             users['gender'] = (
                 (1, 'males', u'Мужчины', group.users.filter(sex=2).count()),
                 (2, 'females', u'Женщины', group.users.filter(sex=1).count()),
@@ -340,16 +351,23 @@ class GroupStatPercentageManager(models.Manager):
             users['friends'] = (
                 (1, 'no_friends', u'Нет друзей', group.users.filter(friends=0).count()),
                 (2, 'friends_50', u'Друзей < 50', group.users.filter(friends__gte=0, friends__lt=50).count()),
-                (3, 'friends_50_100', u'50 < друзей < 100', group.users.filter(friends__gte=50, friends__lt=100).count()),
-                (4, 'friends_100_150', u'100 < друзей < 150', group.users.filter(friends__gte=100, friends__lt=150).count()),
-                (5, 'friends_150_200', u'150 < друзей < 200', group.users.filter(friends__gte=150, friends__lt=200).count()),
-                (6, 'friends_200_300', u'200 < друзей < 300', group.users.filter(friends__gte=200, friends__lt=300).count()),
-                (7, 'friends_300_400', u'300 < друзей < 400', group.users.filter(friends__gte=300, friends__lt=400).count()),
+                (3, 'friends_50_100', u'50 < друзей < 100',
+                 group.users.filter(friends__gte=50, friends__lt=100).count()),
+                (4, 'friends_100_150', u'100 < друзей < 150',
+                 group.users.filter(friends__gte=100, friends__lt=150).count()),
+                (5, 'friends_150_200', u'150 < друзей < 200',
+                 group.users.filter(friends__gte=150, friends__lt=200).count()),
+                (6, 'friends_200_300', u'200 < друзей < 300',
+                 group.users.filter(friends__gte=200, friends__lt=300).count()),
+                (7, 'friends_300_400', u'300 < друзей < 400',
+                 group.users.filter(friends__gte=300, friends__lt=400).count()),
                 (8, 'friends_400', u'400 < рейтинг', group.users.filter(friends__gte=400).count()),
             )
             users['activity'] = (
-                (1, 'active', u'Активны в сети', group.users.filter(counters_updated__isnull=False, sum_counters__gt=0).count()),
-                (2, 'passive', u'Не активны в сети', group.users.filter(counters_updated__isnull=False, sum_counters=0).count()),
+                (1, 'active', u'Активны в сети', group.users.filter(
+                    counters_updated__isnull=False, sum_counters__gt=0).count()),
+                (2, 'passive', u'Не активны в сети', group.users.filter(
+                    counters_updated__isnull=False, sum_counters=0).count()),
             )
 
         # save stats
@@ -395,10 +413,10 @@ class GroupStatPercentageManager(models.Manager):
                     order = self.fields_map[name][0]
                     value_type = self.fields_map[name][1]
                     if 'females_' in value_type:
-                        value_type = value_type.replace('females_','')
+                        value_type = value_type.replace('females_', '')
                         type += '_females'
                     elif 'males_' in value_type:
-                        value_type = value_type.replace('males_','')
+                        value_type = value_type.replace('males_', '')
                         type += '_males'
                 except KeyError:
                     value_type = name
@@ -419,7 +437,8 @@ class GroupStatPercentageManager(models.Manager):
         groupstats = []
         # save statistic
         for stat in stats:
-            groupstat, created = self.get_or_create(group=group, type=stat.pop('type'), value_type=stat.pop('value_type'), defaults=stat)
+            groupstat, created = self.get_or_create(
+                group=group, type=stat.pop('type'), value_type=stat.pop('value_type'), defaults=stat)
             if not created:
                 groupstat.__dict__.update(stat)
                 groupstat.save()
@@ -427,12 +446,13 @@ class GroupStatPercentageManager(models.Manager):
 
         return groupstats
 
+
 class GroupStatisticRemoteManager(VkontakteManager):
 
     def fetch_for_group(self, group, date_from=None, date_to=None, **kwargs):
 
         if not date_from:
-            date_from = datetime(2000,1,1).strftime('%Y-%m-%d')
+            date_from = datetime(2000, 1, 1).strftime('%Y-%m-%d')
         if not date_to:
             date_to = datetime.today().strftime('%Y-%m-%d')
 
@@ -444,11 +464,13 @@ class GroupStatisticRemoteManager(VkontakteManager):
 
         instances = []
         for instance in self.get(**kwargs):
-            instance.fetched = datetime.now()
+            instance.fetched = timezone.now()
             instance.group = kwargs.get('group')
             instances += [self.get_or_create_from_instance(instance)]
 
+
 class GroupStatistic(VkontakteModel):
+
     '''
     Group statistic model collecting information via API
     http://vk.com/developers.php?oid=-1&p=stats.get
@@ -457,7 +479,7 @@ class GroupStatistic(VkontakteModel):
     class Meta:
         verbose_name = _('Vkontakte group API statistic')
         verbose_name_plural = _('Vkontakte group API statistics')
-        unique_together = ('group','date')
+        unique_together = ('group', 'date')
 
     methods_namespace = 'stats'
 
@@ -517,7 +539,7 @@ class GroupStatistic(VkontakteModel):
     age_45 = models.PositiveIntegerField(u'От 45', null=True)
 
     objects = models.Manager()
-    remote = GroupStatisticRemoteManager(remote_pk=('group','date'), methods={
+    remote = GroupStatisticRemoteManager(remote_pk=('group', 'date'), methods={
         'get': 'get',
     })
 
@@ -543,14 +565,16 @@ class GroupStatistic(VkontakteModel):
                 '45-100': 'age_45',
             }
         }
-        for response_field in ['sex','age']:
+        for response_field in ['sex', 'age']:
             if response.get(response_field):
                 for item in response.get(response_field):
                     response[fields_map[response_field][item['value']]] = item['visitors']
 
         super(GroupStatistic, self).parse(response)
 
+
 class GroupStatisticAbstract(models.Model):
+
     class Meta:
         abstract = True
 
@@ -565,7 +589,7 @@ class GroupStatisticAbstract(models.Model):
 
     new_members = models.PositiveIntegerField(u'Новые участники', null=True)
     ex_members = models.PositiveIntegerField(u'Вышедшие участники', null=True)
-    members = models.IntegerField(u'Всего участников', null=True) # strange, but there is possible negative values
+    members = models.IntegerField(u'Всего участников', null=True)  # strange, but there is possible negative values
 
     reach = models.PositiveIntegerField(u'Полный охват', null=True)
     reach_subsribers = models.PositiveIntegerField(u'Охват подписчиков', null=True)
@@ -635,7 +659,9 @@ class GroupStatisticAbstract(models.Model):
     sources_audio = models.PositiveIntegerField(u'Аудиозаписи', null=True)
     sources_favorites = models.PositiveIntegerField(u'Прямые ссылки', null=True)
 
+
 class GroupStat(GroupStatisticAbstract):
+
     '''
     Group statistic model collecting information via parser
     '''
@@ -646,15 +672,18 @@ class GroupStat(GroupStatisticAbstract):
 
     group = models.ForeignKey(Group, verbose_name=u'Группа', related_name='statistics')
     date = models.DateField(u'Дата', db_index=True)
-    period = models.PositiveSmallIntegerField(u'Период', choices=((1, u'День'), (30, u'Месяц')), default=1, db_index=True)
+    period = models.PositiveSmallIntegerField(
+        u'Период', choices=((1, u'День'), (30, u'Месяц')), default=1, db_index=True)
 
     objects = GroupStatManager()
 
+
 class GroupStatPercentage(models.Model):
+
     class Meta:
         verbose_name = _('Vkontakte group percetage statistic')
         verbose_name_plural = _('Vkontakte group percetage statistics')
-        unique_together = ('group','type','value_type')
+        unique_together = ('group', 'type', 'value_type')
 
     group = models.ForeignKey(Group, verbose_name=u'Группа', related_name='percentage_statistics')
     type = models.CharField(max_length=50)

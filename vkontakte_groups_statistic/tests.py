@@ -1,11 +1,19 @@
 # -*- coding: utf-8 -*-
+from datetime import timedelta, date
+
 from django.test import TestCase
+<<<<<<< HEAD
 from models import GroupStat, GroupStatistic, GroupStatisticMembers
 from vkontakte_groups.models import Group
+=======
+from django.utils import timezone
+>>>>>>> upstream/master
 from vkontakte_groups.factories import GroupFactory
-from datetime import datetime, timedelta
+
+from .models import GroupStat, GroupStatistic
 
 GROUP_ID = 1
+
 
 class VkontakteGroupsStatisticTest(TestCase):
 
@@ -20,7 +28,7 @@ class VkontakteGroupsStatisticTest(TestCase):
         stat = GroupStat.objects.filter(period=30)[0]
         self.assertGreater(stat.views, 0)
         self.assertGreater(stat.visitors, 0)
-        self.assertNotEqual(stat.date, None)
+        self.assertIsInstance(stat.date, date)
 
         stat = GroupStat.objects.filter(period=1)[0]
         self.assertGreater(stat.members, 0)
@@ -28,10 +36,10 @@ class VkontakteGroupsStatisticTest(TestCase):
         self.assertGreater(stat.visitors, 0)
         self.assertGreater(stat.males, 0)
         self.assertGreater(stat.females, 0)
-        self.assertNotEqual(stat.date, None)
+        self.assertIsInstance(stat.date, date)
 
         # test date_from argument
-        date_from = datetime.now() - timedelta(5)
+        date_from = timezone.now() - timedelta(5)
         stat_month_count = GroupStat.objects.filter(period=30).count()
         GroupStat.objects.all().delete()
 
@@ -45,14 +53,14 @@ class VkontakteGroupsStatisticTest(TestCase):
         self.assertEqual(GroupStatistic.objects.count(), 0)
 
         group.fetch_statistic(source='api')
-        self.assertNotEqual(GroupStatistic.objects.count(), 0)
+        self.assertGreater(GroupStatistic.objects.count(), 0)
 
         stat = GroupStatistic.objects.all()[0]
         self.assertGreater(stat.views, 0)
         self.assertGreater(stat.visitors, 0)
         self.assertGreater(stat.males, 0)
         self.assertGreater(stat.females, 0)
-        self.assertNotEqual(stat.date, None)
+        self.assertIsInstance(stat.date, date)
 
 class VkontakteGroupsStatisticMembers(TestCase):
     #TODO rewrite using model other than Group and factory (?)
