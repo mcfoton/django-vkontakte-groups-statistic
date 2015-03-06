@@ -102,7 +102,7 @@ class GroupStatManager(models.Manager):
                 (u'Видеозаписи', 'section_video'),
                 (u'Фотоальбомы', 'section_photoalbums'),
                 # VK убрал график после разделения графиков на вкладки cocacola 2012-12-18
-#                    (u'Приложения', 'section_applications'),
+                # (u'Приложения', 'section_applications'),
                 (u'Документы', 'section_documents'),
             ),
             'sources': (
@@ -459,7 +459,7 @@ class GroupStatisticRemoteManager(VkontakteManager):
         return self.fetch(group=group, date_from=date_from, date_to=date_to, **kwargs)
 
     def fetch(self, **kwargs):
-
+        
         kwargs['gid'] = kwargs.get('group').remote_id
 
         instances = []
@@ -493,19 +493,19 @@ class GroupStatistic(VkontakteModel):
 #    comments = models.PositiveIntegerField(u'Комментарии', null=True)
 #    shares = models.PositiveIntegerField(u'Рассказать друзьям', null=True)
 #    references = models.PositiveIntegerField(u'Упоминания', null=True)
-#
+#   
 #    new_members = models.PositiveIntegerField(u'Новые участники', null=True)
 #    ex_members = models.PositiveIntegerField(u'Вышедшие участники', null=True)
 #    members = models.PositiveIntegerField(u'Всего участников', null=True)
-#
+#   
 #    reach = models.PositiveIntegerField(u'Полный охват', null=True)
 #    reach_subsribers = models.PositiveIntegerField(u'Охват подписчиков', null=True)
-#
+#   
 #    widget_users_views = models.PositiveIntegerField(u'Просмотры пользователей ВКонтакте', null=True)
 #    widget_members_views = models.PositiveIntegerField(u'Просмотры участников группы', null=True)
 #    widget_new_users = models.PositiveIntegerField(u'Новые участники', null=True)
 #    widget_ex_users = models.PositiveIntegerField(u'Вышедшие участники', null=True)
-#
+#   
 #    ads_visitors = models.PositiveIntegerField(u'Зашедшие с рекламы', null=True)
 #    ads_members = models.PositiveIntegerField(u'Вступившие с рекламы', null=True)
 #    act_visitors = models.PositiveIntegerField(u'Зашедшие с акций', null=True)
@@ -520,7 +520,7 @@ class GroupStatistic(VkontakteModel):
 #    section_photoalbums = models.PositiveIntegerField(u'Фотоальбомы', null=True)
 #    section_applications = models.PositiveIntegerField(u'Приложения', null=True)
 #    section_documents = models.PositiveIntegerField(u'Документы', null=True)
-#
+#    
 #    activity_wall = models.PositiveIntegerField(u'Сообщения на стене', null=True)
 #    activity_photos = models.PositiveIntegerField(u'Фотографии', null=True)
 #    activity_photo_comments = models.PositiveIntegerField(u'Комментарии к фотографиям', null=True)
@@ -695,3 +695,19 @@ class GroupStatPercentage(models.Model):
     percents = models.FloatField(u'Проценты', null=True)
 
     objects = GroupStatPercentageManager()
+
+class GroupStatisticMembers(models.Model):
+    class Meta:
+        verbose_name = "Vkontakte group members statistic"
+        verbose_name_plural = "Vkontakte group members statistics"
+        get_latest_by = 'id'
+
+    group = models.ForeignKey(Group, related_name='statistics_members')
+
+    members_count = models.IntegerField(editable=False)
+    updated_at = models.DateTimeField(auto_now_add=True, editable=False)
+
+    def __unicode__(self):
+        return u'%s %s' % (self.group.name, self.updated_at)
+
+import signals
