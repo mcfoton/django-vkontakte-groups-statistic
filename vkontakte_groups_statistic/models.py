@@ -498,8 +498,8 @@ class GroupStatistic(VkontakteModel):
 #    ex_members = models.PositiveIntegerField(u'Вышедшие участники', null=True)
 #    members = models.PositiveIntegerField(u'Всего участников', null=True)
 #   
-#    reach = models.PositiveIntegerField(u'Полный охват', null=True)
-#    reach_subsribers = models.PositiveIntegerField(u'Охват подписчиков', null=True)
+    reach = models.PositiveIntegerField(u'Полный охват', null=True)
+    reach_subsribers = models.PositiveIntegerField(u'Охват подписчиков', null=True)
 #   
 #    widget_users_views = models.PositiveIntegerField(u'Просмотры пользователей ВКонтакте', null=True)
 #    widget_members_views = models.PositiveIntegerField(u'Просмотры участников группы', null=True)
